@@ -7,14 +7,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
 from payments import views as payment_views
-from django.core.management import call_command
-
-# Automatically apply database migrations on application start
-try:
-    call_command('migrate', interactive=False)
-except Exception as e:
-    import sys
-    print("Startup migrations execution warning:", e, file=sys.stderr)
+# NOTE: running migrations at import time is unsafe on serverless platforms.
+# Migrations should be run during the build/deploy step or via a one-off admin job.
 
 urlpatterns = [
     path('admin/', admin.site.urls),
