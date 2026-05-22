@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Update Profile — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="settings" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Update Profile</h4>
+    <div class="card p-4" style="max-width:700px">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h6 class="mb-3 text-muted text-uppercase" style="letter-spacing:1px;font-size:.75rem;font-weight:600;">Personal Info</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6"><label class="form-label">First Name</label>{{ user_form.first_name }}</div>
+                <div class="col-md-6"><label class="form-label">Last Name</label>{{ user_form.last_name }}</div>
+                <div class="col-md-6"><label class="form-label">Email</label>{{ user_form.email }}</div>
+                <div class="col-md-6"><label class="form-label">Phone</label>{{ user_form.phone }}</div>
+                <div class="col-12"><label class="form-label">Address</label>{{ user_form.address }}</div>
+                <div class="col-12"><label class="form-label">Profile Picture</label>{{ user_form.profile_pic }}</div>
+            </div>
+            <h6 class="mb-3 text-muted text-uppercase" style="letter-spacing:1px;font-size:.75rem;font-weight:600;">Provider Info</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6"><label class="form-label">Skill</label>{{ provider_form.skill }}</div>
+                <div class="col-md-6"><label class="form-label">Location</label>{{ provider_form.location }}</div>
+                <div class="col-12"><label class="form-label">Bio</label>{{ provider_form.bio }}</div>
+                <div class="col-12"><div class="form-check">{{ provider_form.availability_status }}<label class="form-check-label ms-2 fw-semibold" style="font-size:.825rem;">Available for bookings</label></div></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'provider_dashboard' %}" class="btn btn-outline-primary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

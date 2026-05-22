@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Share Your Feedback - HyperLocal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 120px; padding-bottom: 60px;">
+    <!-- Centered Card Wrapper -->
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="p-4 border rounded-3 bg-white" style="border-radius: var(--radius-lg) !important; box-shadow: 0 12px 32px rgba(0,0,0,0.03);">
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <div class="p-2 bg-light border rounded-circle mx-auto mb-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="message-square-heart" class="text-dark" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <h3 class="fw-bold text-dark">Share Your Feedback</h3>
+                    <p class="text-muted small">We continuously iterate based on your thoughts. Let us know how we can make your HyperLocal experience even better!</p>
+                </div>
+
+                <hr class="my-4" style="border-color: var(--border-color);">
+
+                <form method="POST" action="{% url 'feedback' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Star Rating Selection -->
+                    <div class="mb-4 text-center">
+                        <label class="form-label small fw-semibold text-secondary d-block mb-2">Overall Rating</label>
+                        <div class="star-rating d-inline-flex flex-row-reverse gap-2">
+                            <input type="radio" id="star5" name="rating" value="5" required>
+                            <label for="star5" class="star-icon"><i data-lucide="star" style="width: 24px; height: 24px;"></i></label>
+                            
+                            <input type="radio" id="star4" name="rating" value="4">
+                            <label for="star4" class="star-icon"><i data-lucide="star" style="width: 24px; height: 24px;"></i></label>
+                            
+                            <input type="radio" id="star3" name="rating" value="3">
+                            <label for="star3" class="star-icon"><i data-lucide="star" style="width: 24px; height: 24px;"></i></label>
+                            
+                            <input type="radio" id="star2" name="rating" value="2">
+                            <label for="star2" class="star-icon"><i data-lucide="star" style="width: 24px; height: 24px;"></i></label>
+                            
+                            <input type="radio" id="star1" name="rating" value="1">
+                            <label for="star1" class="star-icon"><i data-lucide="star" style="width: 24px; height: 24px;"></i></label>
+                        </div>
+                    </div>
+
+                    <!-- Category Type Selector -->
+                    <div class="mb-3">
+                        <label for="feedback_type" class="form-label small fw-semibold text-secondary">Feedback Type</label>
+                        <select id="feedback_type" name="feedback_type" class="form-select" required>
+                            <option value="" disabled selected>Select an option</option>
+                            <option value="service_quality">Service Quality</option>
+                            <option value="app_performance">Website / App Experience</option>
+                            <option value="provider_behavior">Provider Experience</option>
+                            <option value="pricing_payment">Pricing & Payments</option>
+                            <option value="other">Other Inquiry / Suggestions</option>
+                        </select>
+                    </div>
+
+                    <!-- Description/Comments -->
+                    <div class="mb-4">
+                        <label for="comments" class="form-label small fw-semibold text-secondary">Your Comments</label>
+                        <textarea id="comments" name="comments" class="form-control" rows="4" placeholder="Tell us about your experience..." required></textarea>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button type="submit" class="btn btn-primary w-100 py-2.5">Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

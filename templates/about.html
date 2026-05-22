@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us - HyperLocal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 120px;">
+    <!-- Minimal Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-light text-dark px-3 py-2 border mb-3">OUR STORY</span>
+        <h1 class="display-5 fw-bold text-dark tracking-tight">About <span class="accent-outline" style="-webkit-text-stroke: 1.5px var(--primary-text); color: transparent; font-weight: 300;">HyperLocal</span></h1>
+        <p class="text-muted mx-auto" style="max-width: 600px; font-size: 1.1rem; line-height: 1.6;">
+            We are redefining how hyperlocal services are discovered, booked, and delivered. Simplicity, transparency, and trust, at your doorstep.
+        </p>
+    </div>
+
+    <!-- Core Grid Section -->
+    <div class="row g-4 align-items-center mb-5">
+        <div class="col-lg-6">
+            <h2 class="fw-bold mb-4">Bridging the Gap Between You and Expert Professionals</h2>
+            <p class="text-secondary mb-3" style="font-size: 1rem; line-height: 1.7;">
+                HyperLocal was built with a simple mission: to connect householders with the most reliable local services in Muzaffarpur and beyond. We believe that finding an expert plumber, electrician, painter, or cleaning specialist should be as simple as booking a ride.
+            </p>
+            <p class="text-secondary mb-4" style="font-size: 1rem; line-height: 1.7;">
+                By empowering local service providers with modern scheduling tools and providing customers with secure, seamless booking flows, we are elevating community businesses while saving you time.
+            </p>
+            <div class="d-flex gap-3">
+                <a href="{% url 'service_list' %}" class="btn btn-primary">Explore Services</a>
+                <a href="{% url 'contact' %}" class="btn btn-outline-primary">Get in Touch</a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="p-4 border rounded-3 bg-light" style="border-radius: var(--radius-lg) !important;">
+                <h4 class="fw-bold mb-4 d-flex align-items-center">
+                    <i data-lucide="shield-check" class="me-2 text-dark" style="width:24px;height:24px;"></i>Our Core Promises
+                </h4>
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="check" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Vetted Professionals</h6>
+                        <p class="text-muted small mb-0">Every provider on our platform is strictly verified for credentials and work experience.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="dollar-sign" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Upfront Honest Pricing</h6>
+                        <p class="text-muted small mb-0">No hidden fees, no hard negotiations. You see the flat rate before booking.</p>
+                    </div>
+                </div>
+                <div class="d-flex gap-3">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i data-lucide="clock" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Reliable Support</h6>
+                        <p class="text-muted small mb-0">Active request tracking and our dedicated operations support team have your back.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

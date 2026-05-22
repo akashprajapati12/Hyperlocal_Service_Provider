@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% block title %}{% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}Support Chat{% else %}Chat for Booking #{{ booking.id }}{% endif %} — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px; min-height: 85vh;" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Chat Container Card -->
+            <div class="card shadow border-0 overflow-hidden d-flex flex-column" style="height: 75vh; border-radius: var(--radius-lg); background-color: var(--white);">
+                
+                <!-- Chat Header -->
+                <div class="p-3 border-bottom d-flex align-items-center justify-content-between" style="background-color: var(--white); border-color: var(--border-color) !important;">
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{% url 'chat_inbox' %}" class="btn btn-outline-primary btn-sm rounded-circle p-2 d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px;" title="Back to Inbox">
+                            <i data-lucide="arrow-left" style="width: 18px; height: 18px;"></i>
+                        </a>
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <h6 class="mb-0 fw-bold" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                                    {% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}
+                                        {% if request.user.role == 'admin' %}
+                                            {% if booking.user.role == 'admin' %}
+                                                {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}
+                                            {% else %}
+                                                {{ booking.user.get_full_name|default:booking.user.username }}
+                                            {% endif %}
+                                        {% else %}
+                                            Admin Support
+                                        {% endif %}
+                                    {% else %}
+                                        {% if booking.is_disputed %}
+                                            <span class="text-danger"><i data-lucide="alert-triangle" class="me-1 d-inline-block" style="width:16px;height:16px;vertical-align:-2px;"></i> Dispute Group Chat</span>
+                                        {% else %}
+                                            {% if request.user.role == 'admin' %}
+                                                {{ booking.user.get_full_name|default:booking.user.username }} &amp; {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}
+                                            {% elif request.user == booking.user %}
+                                                {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}
+                                            {% else %}
+                                                {{ booking.user.get_full_name|default:booking.user.username }}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </h6>
+                                <span class="badge rounded-pill bg-light text-secondary border small py-1 px-2.5">
+                                    {% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}
+                                        {% if request.user.role == 'admin' %}
+                                            {% if booking.user.role == 'admin' %}
+                                                {{ booking.provider.user.role|title }}
+                                            {% else %}
+                                                {{ booking.user.role|title }}
+                                            {% endif %}
+                                        {% else %}
+                                            Admin
+                                        {% endif %}
+                                    {% else %}
+                                        {% if booking.is_disputed %}
+                                            Admin, Customer & Provider
+                                        {% else %}
+                                            {% if request.user.role == 'admin' %}System Administrator{% elif request.user == booking.user %}Service Provider{% else %}Customer{% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <small class="text-muted d-block small mt-0.5">
+                                {% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}
+                                    <span class="text-primary fw-semibold"><i data-lucide="shield" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-1px;"></i>Official Support Channel</span>
+                                {% else %}
+                                    Booking #{{ booking.id }} — {{ booking.service.service_name }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Contact Details Info exchanged -->
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="text-end d-none d-sm-block small">
+                            <div class="mb-1" style="line-height: 1;">
+                                <span class="text-muted" style="font-size: 0.72rem;">Customer:</span>
+                                <a href="tel:{{ booking.user.phone }}" class="fw-semibold text-primary text-decoration-none" style="font-size: 0.85rem;">
+                                    <i data-lucide="phone" class="me-1 d-inline-block" style="width:11px;height:11px;vertical-align:-1px;"></i>{{ booking.user.phone|default:"Not provided" }}
+                                </a>
+                            </div>
+                            <div style="line-height: 1;">
+                                <span class="text-muted" style="font-size: 0.72rem;">Provider:</span>
+                                <a href="tel:{{ booking.provider.user.phone }}" class="fw-semibold text-primary text-decoration-none" style="font-size: 0.85rem;">
+                                    <i data-lucide="phone" class="me-1 d-inline-block" style="width:11px;height:11px;vertical-align:-1px;"></i>{{ booking.provider.user.phone|default:"Not provided" }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="d-sm-none d-flex gap-2">
+                            <a href="tel:{{ booking.user.phone }}" class="p-2 bg-light rounded-circle text-primary d-inline-flex align-items-center justify-content-center" style="width:32px;height:32px;" title="Call Customer">
+                                <i data-lucide="user" style="width: 14px; height: 14px;"></i>
+                            </a>
+                            <a href="tel:{{ booking.provider.user.phone }}" class="p-2 bg-light rounded-circle text-primary d-inline-flex align-items-center justify-content-center" style="width:32px;height:32px;" title="Call Provider">
+                                <i data-lucide="briefcase" style="width: 14px; height: 14px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Body (Messages Thread) -->
+                <div id="chat-messages-container" class="flex-grow-1 p-4 overflow-y-auto" style="background-color: #f8f9fa;">
+                    {% if chat_messages %}
+                        {% for msg in chat_messages %}
+                            <div class="d-flex mb-3 {% if msg.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+                                <div class="max-width-70">
+                                    <!-- Sender tag name above bubble -->
+                                    <small class="text-muted d-block mb-1 ps-1 {% if msg.sender == request.user %}text-end pe-1{% endif %}" style="font-size: 0.75rem; font-weight: 500;">
+                                        {% if msg.sender.role == 'admin' %}
+                                            <span class="text-danger fw-bold"><i data-lucide="shield" class="me-1 d-inline-block" style="width:10px;height:10px;vertical-align:-1px;"></i>Admin</span>
+                                        {% else %}
+                                            {% if msg.sender == request.user %}
+                                                You
+                                            {% else %}
+                                                {{ msg.sender.get_full_name|default:msg.sender.username }}
+                                            {% endif %}
+                                        {% endif %}
+                                    </small>
+                                    <div class="py-2.5 px-3 rounded shadow-sm msg-bubble {% if msg.sender == request.user %}bg-primary text-white msg-outgoing{% else %}bg-white text-dark border msg-incoming{% endif %}" 
+                                         style="font-size: 0.92rem; border-radius: 16px !important; line-height: 1.45; word-break: break-word;">
+                                        {{ msg.message }}
+                                    </div>
+                                    <small class="text-muted d-block mt-1 text-end px-1" style="font-size: 0.7rem;">{{ msg.created_at|time:"h:i A" }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Empty Chat Thread Illustration -->
+                        <div id="empty-chat-placeholder" class="text-center py-5 my-auto">
+                            <div class="mb-3 d-inline-flex p-4 rounded-circle bg-white shadow-sm text-primary">
+                                <i data-lucide="message-square" style="width: 40px; height: 40px;"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1" style="font-family:'Poppins'; color: var(--primary-text);">Secure Chat Active</h6>
+                            <p class="text-muted small mx-auto mb-0" style="max-width: 320px;">Feel free to discuss details, share coordinates, or coordinate exact timings for this service booking.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Chat Input Footer -->
+                <div class="p-3 border-top" style="background-color: var(--white); border-color: var(--border-color) !important;">
+                    {% if booking.status == 'completed' or booking.status == 'cancelled' %}
+                        {% if request.user.role == 'admin' or booking.is_disputed %}
+                            <form id="chat-form" method="POST" class="d-flex gap-2">
+                                {% csrf_token %}
+                                <input type="text" name="message" id="chat-input" class="form-control border shadow-none py-2.5 px-3" placeholder="{% if request.user.role == 'admin' %}Type a message as Admin...{% else %}Type a message in dispute chat...{% endif %}" autocomplete="off" required style="border-radius: 30px !important; font-size: 0.92rem;">
+                                <button type="submit" class="btn btn-primary d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; min-width: 48px; border-radius: 50% !important; padding: 0 !important; background-color: var(--primary) !important; color: white !important; border: 2px solid var(--white) !important;">
+                                    <i data-lucide="send" style="width: 22px; height: 22px; stroke-width: 2.5; color: white !important;"></i>
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-warning mb-0 text-center d-flex align-items-center justify-content-center gap-2 py-2" style="border-radius: 30px !important; font-size: 0.88rem;">
+                                <i data-lucide="lock" style="width:16px;height:16px;"></i>
+                                <span>This conversation is closed because the booking is completed or cancelled.</span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <form id="chat-form" method="POST" class="d-flex gap-2">
+                            {% csrf_token %}
+                            <input type="text" name="message" id="chat-input" class="form-control border shadow-none py-2.5 px-3" placeholder="Type a message here..." autocomplete="off" required style="border-radius: 30px !important; font-size: 0.92rem;">
+                            <button type="submit" class="btn btn-primary d-inline-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; min-width: 48px; border-radius: 50% !important; padding: 0 !important; background-color: var(--primary) !important; color: white !important; border: 2px solid var(--white) !important;">
+                                <i data-lucide="send" style="width: 22px; height: 22px; stroke-width: 2.5; color: white !important;"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .max-width-70 {
+        max-width: 70%;
+    }
+    #chat-messages-container {
+        scrollbar-width: thin;
+    }
+    .msg-outgoing {
+        border-bottom-right-radius: 4px !important;
+    }
+    .msg-incoming {
+        border-bottom-left-radius: 4px !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('chat-messages-container');
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('chat-input');
+        const currentUserId = {{ request.user.id }};
+
+        const currentUserRole = "{{ request.user.role }}";
+
+        // Scroll to bottom on initial load
+        container.scrollTop = container.scrollHeight;
+
+        // Submit message via AJAX
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const text = input.value.trim();
+                if (!text) return;
+
+                const formData = new FormData(form);
+
+                fetch('', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        input.value = '';
+                        fetchMessages();
+                    }
+                })
+                .catch(err => console.error('Error sending message:', err));
+            });
+        }
+
+        // Periodically poll for new messages
+        function fetchMessages() {
+            fetch('{% url "booking_chat_messages" booking.id %}')
+            .then(res => res.json())
+            .then(data => {
+                if (data.messages && data.messages.length > 0) {
+                    const placeholder = document.getElementById('empty-chat-placeholder');
+                    if (placeholder) placeholder.remove();
+
+                    // Track scroll position to keep scroll at bottom if already near bottom
+                    const isNearBottom = container.scrollHeight - container.clientHeight - container.scrollTop < 100;
+
+                    let html = '';
+                    data.messages.forEach(msg => {
+                        const isMe = msg.sender_id === currentUserId;
+                        
+                        let senderLabel = '';
+                        if (msg.sender_role === 'admin') {
+                            senderLabel = '<span class="text-danger fw-bold"><i data-lucide="shield" class="me-1 d-inline-block" style="width:10px;height:10px;vertical-align:-1px;"></i>Admin</span>';
+                        } else {
+                            if (isMe) {
+                                senderLabel = 'You';
+                            } else {
+                                senderLabel = msg.sender_name;
+                            }
+                        }
+
+                        html += `
+                            <div class="d-flex mb-3 ${isMe ? 'justify-content-end' : 'justify-content-start'}">
+                                <div class="max-width-70">
+                                    <small class="text-muted d-block mb-1 ps-1 ${isMe ? 'text-end pe-1' : ''}" style="font-size: 0.75rem; font-weight: 500;">
+                                        ${senderLabel}
+                                    </small>
+                                    <div class="py-2.5 px-3 rounded shadow-sm msg-bubble ${isMe ? 'bg-primary text-white msg-outgoing' : 'bg-white text-dark border msg-incoming'}" 
+                                         style="font-size: 0.92rem; border-radius: 16px !important; line-height: 1.45; word-break: break-word;">
+                                        ${escapeHtml(msg.message)}
+                                    </div>
+                                    <small class="text-muted d-block mt-1 text-end px-1" style="font-size: 0.7rem;">${msg.created_at}</small>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML = html;
+
+                    if (isNearBottom || html.length > 0) {
+                        container.scrollTop = container.scrollHeight;
+                    }
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                }
+            })
+            .catch(err => console.error('Error fetching messages:', err));
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Poll messages every 2.5 seconds
+        setInterval(fetchMessages, 2500);
+    });
+</script>
+{% endblock %}

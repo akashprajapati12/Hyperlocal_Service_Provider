@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Provider Sign Up — HyperLocal{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card" style="max-width:500px">
+        <div class="text-center mb-3">
+            <a href="{% url 'home' %}" class="text-decoration-none">
+                <h4 style="font-family:'Poppins';font-weight:700;color:var(--primary-text)"><i data-lucide="map-pin" class="me-1" style="width:20px;height:20px;stroke-width:1.8;vertical-align:-2px;"></i>Hyper<span style="font-weight:400;color:var(--secondary-text);">Local</span></h4>
+            </a>
+        </div>
+        <h2>Join as Provider</h2>
+        <p class="subtitle">Offer your services and start earning</p>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-6">
+                    <label class="form-label">First Name</label>{{ form.first_name }}
+                    {% if form.first_name.errors %}<small class="text-danger d-block mt-1">{{ form.first_name.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Last Name</label>{{ form.last_name }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Username</label>{{ form.username }}
+                    {% if form.username.errors %}<small class="text-danger d-block mt-1">{{ form.username.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>{{ form.email }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone</label>{{ form.phone }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Primary Skill</label>{{ form.skill }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Location</label>{{ form.location }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Bio</label>{{ form.bio }}
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Password</label>{{ form.password1 }}
+                    {% if form.password1.errors %}<small class="text-danger d-block mt-1">{{ form.password1.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Confirm Password</label>{{ form.password2 }}
+                    {% if form.password2.errors %}<small class="text-danger d-block mt-1">{{ form.password2.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2">Create Provider Account</button>
+                </div>
+            </div>
+        </form>
+        <div class="text-center mt-3">
+            <small class="text-muted">Already have an account? <a href="{% url 'login' %}" class="fw-semibold text-decoration-underline text-dark">Login</a></small><br>
+            <small class="text-muted">Want to book services? <a href="{% url 'register' %}" class="fw-semibold text-decoration-underline text-dark">Sign up as Customer</a></small>
+        </div>
+    </div>
+</div>
+{% endblock %}

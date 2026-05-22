@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Payment Failed — HyperLocal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .failed-container {
+        padding-top: 120px;
+        padding-bottom: 60px;
+    }
+    .glass-failed-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(239, 68, 68, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-failed-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 35px rgba(239, 68, 68, 0.08);
+    }
+    .pulse-danger {
+        animation: pulseDanger 2s infinite;
+        background-color: rgba(254, 226, 226, 0.8);
+        border-radius: 9999px;
+        padding: 12px;
+        display: inline-block;
+    }
+    @keyframes pulseDanger {
+        0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container failed-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="glass-failed-card p-5 text-center">
+                <div class="mb-4">
+                    <div class="pulse-danger">
+                        <i data-lucide="alert-triangle" class="text-danger" style="width:48px;height:48px;stroke-width:1.5;"></i>
+                    </div>
+                </div>
+                
+                <h3 style="font-family:'Poppins'" class="fw-bold text-dark">Payment Failed</h3>
+                <p class="text-muted small mb-4">We were unable to complete the secure payment transaction. The gateway reported a cancellation or simulation failure.</p>
+                
+                <div class="p-3 text-start mb-4" style="background-color:#fff5f5; border:1px solid #fed7d7; border-radius:14px">
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Booking ID</span><strong class="small text-dark">#{{ booking.id }}</strong></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Service</span><strong class="small text-dark">{{ booking.service.service_name }}</strong></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Provider</span><span class="small text-dark">{{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</span></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Payment Method</span><span class="small text-dark">UPI QR Code</span></div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Transaction Status</span>
+                        <span class="badge bg-danger small">Declined / Failed</span>
+                    </div>
+                    <hr class="my-2" style="border-color:#fec7c7;">
+                    <div class="d-flex justify-content-between align-items-center"><span class="fw-bold small text-dark">Amount Attempted</span><span class="price-tag text-danger">₹{{ payment.amount }}</span></div>
+                </div>
+                
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'upi_payment' booking.id %}" class="btn btn-danger px-4 py-2" style="border-radius:10px; display:inline-flex; align-items:center; gap:8px;">
+                        <i data-lucide="refresh-cw" style="width:16px;height:16px;"></i>Try Payment Again
+                    </a>
+                    <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline-secondary px-4 py-2" style="border-radius:10px; display:inline-flex; align-items:center; gap:8px;">
+                        <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>Back to Booking
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

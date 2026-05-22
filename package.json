@@ -1,0 +1,7 @@
+{
+  "name": "hyperlocal-service",
+  "private": true,
+  "scripts": {
+    "vercel-build": "python3 -m pip install -r requirements.txt && python3 manage.py collectstatic --noinput --clear"
+  }
+}

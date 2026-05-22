@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Add Service — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="plus-circle" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Add New Service</h4>
+    <div class="card p-4" style="max-width:640px">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3"><label class="form-label">Service Name</label>{{ form.service_name }}</div>
+            <div class="mb-3"><label class="form-label">Category</label>{{ form.category }}</div>
+            <div class="mb-3"><label class="form-label">Description</label>{{ form.description }}</div>
+            <div class="mb-4"><label class="form-label">Price (₹)</label>{{ form.price }}</div>
+            <button type="submit" class="btn btn-primary">Add Service</button>
+            <a href="{% url 'provider_dashboard' %}" class="btn btn-outline-primary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>
+</div>
+{% endblock %}

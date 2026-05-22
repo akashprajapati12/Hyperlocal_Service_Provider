@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}My Services — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0" style="font-family:'Poppins'"><i data-lucide="briefcase" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>My Services</h4>
+        <a href="{% url 'add_service' %}" class="btn btn-primary d-flex align-items-center"><i data-lucide="plus" class="me-1" style="width:16px;height:16px;"></i>Add Service</a>
+    </div>
+    <div class="row g-4">
+        {% for service in services %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card service-card">
+                <div class="card-body">
+                    <span class="category-badge mb-2 d-inline-block">{{ service.get_category_display }}</span>
+                    <h5 class="mt-2" style="font-size:1.1rem;">{{ service.service_name }}</h5>
+                    <p class="text-muted small mb-3">{{ service.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <span class="price-tag">₹{{ service.price }}</span>
+                        <form method="POST" action="{% url 'delete_service' service.id %}" onsubmit="return confirm('Delete this service?')">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-outline-danger d-flex align-items-center"><i data-lucide="trash-2" style="width:14px;height:14px;"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i data-lucide="briefcase" class="mx-auto d-block mb-2" style="width:48px;height:48px;stroke-width:1.5;"></i>
+            <p class="mt-2">No services yet. <a href="{% url 'add_service' %}" class="text-decoration-underline text-dark fw-semibold">Add your first service</a></p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</div>
+{% endblock %}

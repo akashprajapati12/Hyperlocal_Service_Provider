@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up — HyperLocal{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card" style="max-width:500px">
+        <div class="text-center mb-4">
+            <a href="{% url 'home' %}" class="navbar-brand d-inline-flex align-items-center justify-content-center"
+                style="font-family:'Poppins';font-weight:700;font-size:2rem;letter-spacing:0.05em;">
+                <i data-lucide="map-pin" class="me-2"
+                    style="width:20px;height:20px;stroke-width:1.8;vertical-align:-2px;color:#000000;"></i>
+                <span class="brand-hyper"
+                    style="color:transparent;-webkit-text-stroke:1px #000000;font-weight:700;">Hyper</span>
+                <span class="brand-local" style="color:#000000;font-weight:700;">Local</span>
+            </a>
+        </div>
+        <h2 class="text-center">Create Account</h2>
+        <p class="subtitle text-center">Choose your role and register</p>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Role Selection -->
+            <div class="mb-4">
+                <label class="form-label d-block mb-2">I want to join as</label>
+                <div class="d-flex gap-2">
+                    <label class="role-option flex-fill text-center py-2 px-2" id="role-customer-label"
+                        style="border:1px solid var(--border-color);cursor:pointer;transition:var(--transition);border-radius:var(--radius);">
+                        <input type="radio" name="role" value="customer" {% if form.role.value == 'provider' %}{% else %}checked{% endif %} class="d-none" id="role-customer">
+                        <i data-lucide="user" class="d-block mx-auto mb-1"
+                            style="width:18px;height:18px;stroke-width:1.8;"></i>
+                        <strong style="font-size:.8rem;color:var(--primary-text);">Customer</strong>
+                        <small class="d-block text-muted" style="font-size:.7rem">Book services</small>
+                    </label>
+                    <label class="role-option flex-fill text-center py-2 px-2" id="role-provider-label"
+                        style="border:1px solid var(--border-color);cursor:pointer;transition:var(--transition);border-radius:var(--radius);">
+                        <input type="radio" name="role" value="provider" {% if form.role.value == 'provider' %}checked{% endif %} class="d-none" id="role-provider">
+                        <i data-lucide="wrench" class="d-block mx-auto mb-1"
+                            style="width:18px;height:18px;stroke-width:1.8;"></i>
+                        <strong style="font-size:.8rem;color:var(--primary-text);">Provider</strong>
+                        <small class="d-block text-muted" style="font-size:.7rem">Offer services</small>
+                    </label>
+                </div>
+                {% if form.role.errors %}<small class="text-danger d-block mt-1">{{ form.role.errors.0 }}</small>{% endif %}
+            </div>
+
+            <!-- Common Fields -->
+            <div class="row g-3">
+                <div class="col-6">
+                    <label class="form-label">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}<small class="text-danger d-block mt-1">{{ form.first_name.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}<small class="text-danger d-block mt-1">{{ form.last_name.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}<small class="text-danger d-block mt-1">{{ form.username.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}<small class="text-danger d-block mt-1">{{ form.email.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone</label>
+                    {{ form.phone }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    {{ form.address }}
+                </div>
+            </div>
+
+            <!-- Provider Fields (hidden by default, shown via JS) -->
+            <div id="provider-fields" style="display:none;margin-top:1rem">
+                <hr class="my-3">
+                <h6 class="mb-3 d-flex align-items-center" style="font-family:'Poppins';font-weight:600;"><i
+                        data-lucide="briefcase" class="me-2" style="width:16px;height:16px;"></i>Provider Details</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Primary Skill <span class="text-danger">*</span></label>
+                        {{ form.skill }}
+                        {% if form.skill.errors %}<small class="text-danger d-block mt-1">{{ form.skill.errors.0 }}</small>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Service Location <span class="text-danger">*</span></label>
+                        {{ form.location }}
+                        {% if form.location.errors %}<small class="text-danger d-block mt-1">{{ form.location.errors.0 }}</small>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Bio</label>
+                        {{ form.bio }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Verification Document <span class="text-danger">*</span></label>
+                        {{ form.document }}
+                        <small class="text-muted d-block mt-2 d-flex align-items-start"><i data-lucide="info"
+                                class="me-2 mt-1" style="width:14px;height:14px;flex-shrink:0;"></i>Upload ID proof or
+                            skill certificate (PDF, JPG, PNG) for verification.</small>
+                        {% if form.document.errors %}<small class="text-danger d-block mt-1">{{ form.document.errors.0 }}</small>{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div class="row g-3 mt-1">
+                <div class="col-6">
+                    <label class="form-label">Password</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}<small class="text-danger d-block mt-1">{{ form.password1.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-6">
+                    <label class="form-label">Confirm Password</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}<small class="text-danger d-block mt-1">{{ form.password2.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-primary w-100 py-2" id="submit-btn">Create Account</button>
+                </div>
+            </div>
+        </form>
+        <div class="text-center mt-3">
+            <small class="text-muted">Already have an account? <a href="{% url 'login' %}"
+                    class="fw-semibold text-decoration-underline text-dark">Login</a></small>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const customerRadio = document.getElementById('role-customer');
+        const providerRadio = document.getElementById('role-provider');
+        const customerLabel = document.getElementById('role-customer-label');
+        const providerLabel = document.getElementById('role-provider-label');
+        const providerFields = document.getElementById('provider-fields');
+        const submitBtn = document.getElementById('submit-btn');
+
+        function updateUI() {
+            const isProvider = providerRadio.checked;
+            // Toggle provider fields
+            providerFields.style.display = isProvider ? 'block' : 'none';
+            // Update card styles
+            customerLabel.style.borderColor = !isProvider ? 'var(--primary-text)' : 'var(--border-color)';
+            customerLabel.style.background = !isProvider ? 'var(--secondary-bg)' : 'transparent';
+            providerLabel.style.borderColor = isProvider ? 'var(--primary-text)' : 'var(--border-color)';
+            providerLabel.style.background = isProvider ? 'var(--secondary-bg)' : 'transparent';
+            // Update button text
+            submitBtn.textContent = isProvider ? 'Create Provider Account' : 'Create Account';
+        }
+
+        customerRadio.addEventListener('change', updateUI);
+        providerRadio.addEventListener('change', updateUI);
+
+        // Initialize on page load (handles validation re-render)
+        updateUI();
+    });
+</script>
+{% endblock %}

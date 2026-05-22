@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Book Service — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card p-4">
+                <h4 class="mb-4 d-flex align-items-center" style="font-family:'Poppins'"><i data-lucide="calendar" class="me-2" style="width:20px;height:20px;"></i>Book Service</h4>
+                <div class="p-3 mb-4" style="background-color:var(--secondary-bg); border:1px solid var(--border-color); border-radius:var(--radius);">
+                    <h5 class="mb-1" style="font-size:1.1rem;">{{ service.service_name }}</h5>
+                    <p class="text-muted mb-2 small">by {{ service.provider.user.get_full_name|default:service.provider.user.username }}</p>
+                    <span class="price-tag">₹{{ service.price }}</span>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Select Date</label>
+                        {{ form.booking_date }}
+                        {% if form.booking_date.errors %}<small class="text-danger d-block mt-1">{{ form.booking_date.errors.0 }}</small>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary small">Select Time Slot</label>
+                        {{ form.time_slot }}
+                        {% if form.time_slot.errors %}<small class="text-danger d-block mt-1">{{ form.time_slot.errors.0 }}</small>{% endif %}
+                    </div>
+                    
+                    <!-- Custom Time Input Fields (Toggled by JS) -->
+                    <div id="custom-time-fields" class="row g-2 mb-3" style="display: none;">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-secondary small">Start Time</label>
+                            {{ form.custom_start_time }}
+                            {% if form.custom_start_time.errors %}<small class="text-danger d-block mt-1">{{ form.custom_start_time.errors.0 }}</small>{% endif %}
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold text-secondary small">End Time</label>
+                            {{ form.custom_end_time }}
+                            {% if form.custom_end_time.errors %}<small class="text-danger d-block mt-1">{{ form.custom_end_time.errors.0 }}</small>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold text-secondary small">Additional Information (Optional)</label>
+                        {{ form.additional_info }}
+                        {% if form.additional_info.errors %}<small class="text-danger d-block mt-1">{{ form.additional_info.errors.0 }}</small>{% endif %}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Proceed to Payment</button>
+                    <a href="{% url 'service_detail' service.id %}" class="btn btn-outline-primary w-100 mt-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const timeSlotSelect = document.getElementById("id_time_slot");
+        const customTimeContainer = document.getElementById("custom-time-fields");
+
+        function toggleCustomFields() {
+            if (timeSlotSelect && timeSlotSelect.value === "custom") {
+                customTimeContainer.style.display = "flex";
+            } else {
+                customTimeContainer.style.display = "none";
+            }
+        }
+
+        if (timeSlotSelect) {
+            timeSlotSelect.addEventListener("change", toggleCustomFields);
+            toggleCustomFields(); // Run on initial load
+        }
+
+        const dateInput = document.querySelector('input[type="date"]');
+        const serviceId = "{{ service.id }}";
+
+        function checkSlotAvailability() {
+            if (!dateInput || !dateInput.value || !timeSlotSelect) return;
+            
+            const selectedDate = dateInput.value;
+            fetch(`/bookings/check-availability/?service_id=${serviceId}&date=${selectedDate}`)
+                .then(response => response.json())
+                .then(data => {
+                    const bookedSlots = data.booked_slots || [];
+                    
+                    // Reset all options to visible and enabled first
+                    Array.from(timeSlotSelect.options).forEach(option => {
+                        option.disabled = false;
+                        option.style.display = 'block';
+                        // Remove any appended booked tags if present
+                        if (option.innerText.includes(' (Booked)')) {
+                            option.innerText = option.innerText.replace(' (Booked)', '');
+                        }
+                    });
+                    
+                    // Disable/Hide booked slots
+                    bookedSlots.forEach(slot => {
+                        const option = Array.from(timeSlotSelect.options).find(opt => opt.value === slot);
+                        if (option) {
+                            option.disabled = true;
+                            option.style.display = 'none';
+                            option.innerText += ' (Booked)';
+                        }
+                    });
+                    
+                    // If the currently selected option is now disabled, switch to a valid one
+                    if (timeSlotSelect.selectedOptions[0] && timeSlotSelect.selectedOptions[0].disabled) {
+                        const firstAvailable = Array.from(timeSlotSelect.options).find(opt => !opt.disabled);
+                        if (firstAvailable) {
+                            timeSlotSelect.value = firstAvailable.value;
+                            toggleCustomFields();
+                        }
+                    }
+                })
+                .catch(err => console.error("Error checking slot availability:", err));
+        }
+
+        if (dateInput) {
+            dateInput.addEventListener("change", checkSlotAvailability);
+            // Run check on page load to account for any default date value
+            setTimeout(checkSlotAvailability, 200);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% block title %}Booking #{{ booking.id }} — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <h4 style="font-family:'Poppins';">Booking #{{ booking.id }}</h4>
+                    <span class="badge badge-{{ booking.status }} px-3 py-2">{{ booking.get_status_display }}</span>
+                </div>
+
+                <!-- Status Tracker -->
+                <div class="status-tracker mb-5">
+                    <div class="status-step {% if booking.status == 'pending' %}active{% elif booking.status != 'cancelled' %}completed{% endif %}">
+                        <div class="step-dot"><i data-lucide="hourglass" style="width:14px;height:14px;"></i></div>
+                        <div class="step-label">Pending</div>
+                    </div>
+                    <div class="status-step {% if booking.status == 'confirmed' %}active{% elif booking.status == 'completed' %}completed{% endif %}">
+                        <div class="step-dot"><i data-lucide="check" style="width:14px;height:14px;"></i></div>
+                        <div class="step-label">Confirmed</div>
+                    </div>
+                    <div class="status-step {% if booking.status == 'completed' %}active completed{% endif %}">
+                        <div class="step-dot"><i data-lucide="check-circle" style="width:14px;height:14px;"></i></div>
+                        <div class="step-label">Completed</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Service</small>
+                            <strong>{{ booking.service.service_name }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Provider</small>
+                            <strong>{{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Date</small>
+                            <strong>{{ booking.booking_date }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Time Slot</small>
+                            <strong>
+                                {% if booking.time_slot == 'custom' %}
+                                    {{ booking.custom_start_time|time:"h:i A" }} - {{ booking.custom_end_time|time:"h:i A" }} (Custom)
+                                {% else %}
+                                    {{ booking.get_time_slot_display }}
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Amount</small>
+                            <strong class="price-tag">₹{{ booking.total_price }}</strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Payment Status</small>
+                            {% if booking.payment %}
+                                {% if booking.payment.payment_status == 'paid' %}
+                                    <strong class="text-success"><i data-lucide="check-circle" class="me-1" style="width:14px;height:14px;vertical-align:-2px;"></i>Paid ({{ booking.payment.get_payment_method_display }})</strong>
+                                {% elif booking.payment.payment_status == 'refunded' %}
+                                    <strong class="text-danger"><i data-lucide="refresh-cw" class="me-1" style="width:14px;height:14px;vertical-align:-2px;"></i>Refunded</strong>
+                                {% else %}
+                                    <strong class="text-warning"><i data-lucide="clock" class="me-1" style="width:14px;height:14px;vertical-align:-2px;"></i>Pending ({{ booking.payment.get_payment_method_display }})</strong>
+                                {% endif %}
+                            {% else %}
+                                <strong class="text-secondary"><i data-lucide="alert-circle" class="me-1" style="width:14px;height:14px;vertical-align:-2px;"></i>Unpaid</strong>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if booking.additional_info %}
+                    <div class="col-12">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Additional Information</small>
+                            <p class="mb-0 mt-1 small" style="white-space: pre-wrap; line-height: 1.5;">{{ booking.additional_info }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Detailed Overtime Invoice Breakdowns -->
+                    {% if booking.extra_hours > 0.00 %}
+                    <div class="col-12">
+                        <div class="p-3 border rounded-3 bg-white" style="border-radius: var(--radius) !important;">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center"><i data-lucide="receipt" class="me-2 text-dark" style="width:16px;height:16px;"></i>Billing Invoice Breakdown</h6>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary small">Base Service Charge</span>
+                                <span class="small fw-semibold">₹{{ booking.service.price }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-secondary small">Overtime Extensions ({% if booking.extra_hours_part > 0 %}{{ booking.extra_hours_part }}h {% endif %}{% if booking.extra_minutes_part > 0 %}{{ booking.extra_minutes_part }}m{% endif %})</span>
+                                <span class="small fw-semibold text-danger">+₹{{ booking.extra_charges }}</span>
+                            </div>
+                            <hr class="my-2" style="border-color: var(--border-color);">
+                            <div class="d-flex justify-content-between">
+                                <span class="fw-bold text-dark">Total Amount Due</span>
+                                <span class="fw-bold text-primary">₹{{ booking.total_price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Secure Communication & Exchanged Numbers -->
+                    <div class="col-12 mt-2">
+                        <div class="p-3 border rounded-3 bg-white" style="border-radius: var(--radius) !important; border-color: var(--border-color) !important;">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center"><i data-lucide="shield-check" class="me-2 text-success" style="width:18px;height:18px;"></i>Secure Booking Communication</h6>
+                            {% if booking.status == 'confirmed' or booking.status == 'completed' %}
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-md-7">
+                                        <p class="text-muted small mb-0">Since the booking has been accepted, you can now contact each other and chat securely.</p>
+                                        <div class="d-flex flex-column mt-2 gap-1">
+                                            {% if request.user == booking.user %}
+                                                <span class="small"><strong>Provider Name:</strong> {{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</span>
+                                                <span class="small"><strong>Provider Phone:</strong> <a href="tel:{{ booking.provider.user.phone }}" class="text-primary text-decoration-none fw-bold"><i data-lucide="phone" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-1px;"></i>{{ booking.provider.user.phone|default:"Not provided" }}</a></span>
+                                            {% else %}
+                                                <span class="small"><strong>Customer Name:</strong> {{ booking.user.get_full_name|default:booking.user.username }}</span>
+                                                <span class="small"><strong>Customer Phone:</strong> <a href="tel:{{ booking.user.phone }}" class="text-primary text-decoration-none fw-bold"><i data-lucide="phone" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-1px;"></i>{{ booking.user.phone|default:"Not provided" }}</a></span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5 text-md-end">
+                                        <a href="{% url 'booking_chat' booking.id %}" class="btn btn-primary d-inline-flex align-items-center justify-content-center py-2 px-3 w-100">
+                                            <i data-lucide="message-square" class="me-2" style="width:16px;height:16px;"></i>Open Chat Service
+                                        </a>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="p-2 rounded-circle bg-light text-muted">
+                                        <i data-lucide="lock" style="width: 20px; height: 20px;"></i>
+                                    </div>
+                                    <div>
+                                        <p class="mb-0 small text-muted">Contact details and secure chat will unlock automatically once the provider accepts this service request.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 pt-3 border-top">
+                    {% if booking.status == 'pending' or booking.status == 'confirmed' %}
+                        {% if user == booking.user %}
+                        <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-outline-danger">Cancel Booking</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if can_dispute %}
+                    <a href="{% url 'raise_dispute' booking.id %}" class="btn btn-danger">Raise Dispute</a>
+                    {% endif %}
+                    {% if booking.status == 'completed' and user == booking.user and not has_review %}
+                    <a href="{% url 'add_review' booking.id %}" class="btn btn-primary d-inline-flex align-items-center"><i data-lucide="star" class="me-1" style="width:16px;height:16px;"></i>Leave Review</a>
+                    {% endif %}
+                    {% if not has_payment and user == booking.user %}
+                    <a href="{% url 'checkout' booking.id %}" class="btn btn-primary">Pay Now</a>
+                    {% elif booking.payment.payment_status == 'pending' and booking.payment.payment_method == 'online' and user == booking.user %}
+                    <a href="{% url 'upi_payment' booking.id %}" class="btn btn-primary">Complete Payment</a>
+                    {% endif %}
+                    <a href="{% url 'booking_history' %}" class="btn btn-outline-primary">All Bookings</a>
+                </div>
+
+                <!-- Provider Overtime Entry Form -->
+                {% if request.user == booking.provider.user and booking.status != 'cancelled' %}
+                <div class="card p-3 mt-4 border bg-light" style="border-radius: var(--radius) !important;">
+                    <h6 class="fw-bold mb-2 d-flex align-items-center">
+                        <i data-lucide="clock" class="me-2 text-dark" style="width:18px;height:18px;"></i>Record Service Overtime
+                    </h6>
+                    <p class="text-muted small mb-3">If this service job has run past the booked slot, specify the overtime duration below. The system automatically computes extra charges based on your hourly service rate.</p>
+                    <form method="POST" action="{% url 'add_extra_time' booking.id %}">
+                        {% csrf_token %}
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="number" min="0" step="1" name="extra_hours" class="form-control" placeholder="Hours" value="{{ booking.extra_hours_part|default:'0' }}" required>
+                                    <span class="input-group-text">hrs</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="number" min="0" max="59" step="1" name="extra_minutes" class="form-control" placeholder="Minutes" value="{{ booking.extra_minutes_part|default:'0' }}" required>
+                                    <span class="input-group-text">mins</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100 py-2">Save & Calculate</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Dashboard — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-1" style="font-family:'Poppins'">Welcome back, {{ user.first_name|default:user.username }}!</h4>
+    <p class="text-muted mb-4">Here's an overview of your bookings</p>
+
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-stretch">
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="calendar"></i></div>
+            <div>
+                <div class="stat-value">{{ total_bookings }}</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+        </div>
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="hourglass"></i></div>
+            <div>
+                <div class="stat-value">{{ pending_bookings }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="check-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ completed_bookings }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
+        <div class="stat-card flex-fill">
+            <div class="stat-icon text-danger"><i data-lucide="x-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ cancelled_bookings }}</div>
+                <div class="stat-label">Cancelled</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4">
+        <h5 class="mb-3">Recent Bookings</h5>
+        {% if bookings %}
+        <div class="table-responsive recent-bookings-scroll">
+            <table class="table table-modern mb-0">
+                <thead><tr><th>#</th><th>Service</th><th>Provider</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+            </table>
+            <!-- Scrollable container for table body -->
+            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                <table class="table table-modern mb-0">
+                    <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td><a href="{% url 'booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
+                        <td>{{ b.service.service_name }}</td>
+                        <td>{{ b.provider.user.get_full_name|default:b.provider.user.username }}</td>
+                        <td>{{ b.booking_date }}</td>
+                        <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
+                        <td><a href="{% url 'booking_detail' b.id %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i data-lucide="inbox" class="mx-auto mb-2 d-block" style="width:40px;height:40px;stroke-width:1.5;"></i>
+            <p class="mt-2">No bookings yet. <a href="{% url 'service_list' %}" class="text-decoration-underline text-dark fw-semibold">Browse services</a> to get started!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}

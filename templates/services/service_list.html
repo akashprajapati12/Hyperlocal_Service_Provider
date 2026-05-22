@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Services — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="text-center mb-4">
+        <h2 style="font-family:'Poppins'">Browse Services</h2>
+        <p class="text-muted">Find the right professional for your needs</p>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="card p-3 mb-4">
+        <form method="GET" class="d-flex flex-wrap gap-2 align-items-center">
+            <input type="text" name="search" class="form-control" style="max-width:320px;" placeholder="Search services, providers..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-primary d-flex align-items-center"><i data-lucide="search" class="me-1" style="width:16px;height:16px;"></i>Search</button>
+            {% if search_query or selected_category %}<a href="{% url 'service_list' %}" class="btn btn-outline-primary">Clear</a>{% endif %}
+        </form>
+        <div class="mt-3 d-flex flex-wrap gap-2">
+            <a href="{% url 'service_list' %}" class="filter-btn {% if not selected_category %}active{% endif %}">All</a>
+            {% for val, label in categories %}
+            <a href="{% url 'service_list' %}?category={{ val }}" class="filter-btn {% if selected_category == val %}active{% endif %}">{{ label }}</a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Service Grid -->
+    <div class="row g-4">
+        {% for service in services %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card service-card h-100">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        {% if service.provider.user.profile_pic %}
+                        <img src="{{ service.provider.user.profile_pic.url }}" class="provider-avatar" alt="avatar">
+                        {% else %}
+                        <div class="avatar-placeholder">{{ service.provider.user.first_name|first|default:"P" }}</div>
+                        {% endif %}
+                        <div>
+                            <strong class="d-block" style="font-size:.9rem">{{ service.provider.user.get_full_name|default:service.provider.user.username }}</strong>
+                            <small class="text-muted d-flex align-items-center mt-1"><i data-lucide="map-pin" class="me-1" style="width:12px;height:12px;"></i> {{ service.provider.location }}</small>
+                        </div>
+                        {% if service.provider.is_verified %}
+                        <span class="ms-auto text-dark d-inline-flex align-items-center" title="Verified">
+                            <i data-lucide="shield-check" style="width:18px;height:18px;stroke-width:2;"></i>
+                        </span>
+                        {% endif %}
+                    </div>
+                    <span class="category-badge mb-2 d-inline-block align-self-start">{{ service.get_category_display }}</span>
+                    <h5 class="mt-1" style="font-size:1.1rem;">{{ service.service_name }}</h5>
+                    <p class="text-muted small flex-grow-1">{{ service.description|truncatewords:18 }}</p>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="rating-stars d-flex gap-1 align-items-center">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= service.avg_rating %}
+                                    <i data-lucide="star" style="width:13px;height:13px;fill:currentColor;stroke-width:2;"></i>
+                                {% else %}
+                                    <i data-lucide="star" style="width:13px;height:13px;stroke-width:1.5;color:var(--gray-300);"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        <small class="text-muted ms-2">({{ service.review_count }})</small>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-auto pt-3 mb-2 border-top border-light">
+                        <span class="price-tag">₹{{ service.price }}</span>
+                        <a href="{% url 'service_detail' service.id %}" class="btn btn-primary btn-sm">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5 text-muted">
+            <i data-lucide="search" class="mx-auto d-block mb-2" style="width:48px;height:48px;stroke-width:1.5;"></i>
+            <p class="mt-2">No services found. Try a different search or category.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

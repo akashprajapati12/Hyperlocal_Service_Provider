@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Manage Bookings — HyperLocal Admin{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="calendar" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Manage Bookings</h4>
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a href="{% url 'manage_bookings' %}" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+        <a href="{% url 'manage_bookings' %}?status=pending" class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">Pending</a>
+        <a href="{% url 'manage_bookings' %}?status=confirmed" class="filter-btn {% if status_filter == 'confirmed' %}active{% endif %}">Confirmed</a>
+        <a href="{% url 'manage_bookings' %}?status=completed" class="filter-btn {% if status_filter == 'completed' %}active{% endif %}">Completed</a>
+        <a href="{% url 'manage_bookings' %}?status=cancelled" class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
+    </div>
+    <div class="card p-4">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Provider</th><th>Date</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+
+            </table>
+            <!-- Scrollable container for table body -->
+            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                <table class="table table-modern mb-0">
+                    <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td><a href="{% url 'admin_booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
+                        <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+                        <td>{{ b.service.service_name }}</td>
+                        <td>{{ b.provider.user.get_full_name|default:b.provider.user.username }}</td>
+                        <td>{{ b.booking_date }}</td>
+                        <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
+                        <td class="text-end">
+                            <a href="{% url 'admin_booking_detail' b.id %}" class="btn btn-sm btn-outline-primary py-1 px-2.5">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted py-4 small">No bookings found.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Notifications — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:110px; min-height: 80vh;" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1" style="font-family:'Poppins'; font-weight: 700; color: var(--primary-text);">Notifications</h2>
+                    <p class="text-muted mb-0">Stay updated on your booking activities and requests</p>
+                </div>
+                {% if notifications %}
+                <form method="POST" action="{% url 'notifications' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="mark_all_read">
+                    <button type="submit" class="btn btn-outline-primary btn-sm d-flex align-items-center">
+                        <i data-lucide="check-check" class="me-1" style="width:16px;height:16px;"></i>
+                        Mark all as read
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            <!-- Active Django Messages/Alerts -->
+            {% if messages %}
+            <div class="mb-4">
+                <h5 class="fw-bold mb-3 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1rem; color: var(--secondary-text);">
+                    <span class="badge bg-danger me-2" style="width: 8px; height: 8px; border-radius: 50%; display: inline-block; padding: 0;"></span>
+                    Active Alerts
+                </h5>
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0 d-flex align-items-center gap-3 py-3" role="alert" style="background-color: var(--white); border-left: 4px solid {% if message.tags == 'success' %}#198754{% elif message.tags == 'danger' or message.tags == 'error' %}#dc3545{% else %}#0d6efd{% endif %} !important; border-radius: 8px;">
+                    <div class="alert-icon-wrap p-2 rounded-circle" style="background-color: {% if message.tags == 'success' %}#e8f5e9{% elif message.tags == 'danger' or message.tags == 'error' %}#ffebee{% else %}#e3f2fd{% endif %}; color: {% if message.tags == 'success' %}#198754{% elif message.tags == 'danger' or message.tags == 'error' %}#dc3545{% else %}#0d6efd{% endif %}; display: flex; align-items: center; justify-content: center;">
+                        {% if message.tags == 'success' %}
+                        <i data-lucide="check-circle" style="width: 20px; height: 20px;"></i>
+                        {% elif message.tags == 'danger' or message.tags == 'error' %}
+                        <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+                        {% else %}
+                        <i data-lucide="info" style="width: 20px; height: 20px;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <strong class="d-block small text-uppercase text-secondary" style="font-size: 0.75rem; letter-spacing: 0.05em;">Alert Announcement</strong>
+                        <span class="text-dark small">{{ message }}</span>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="top: 50%; transform: translateY(-50%); right: 10px;"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Historical Notifications List -->
+            <div class="card p-3 shadow-sm border-0" style="background-color: var(--white); border-radius: var(--radius-lg);">
+                <h5 class="fw-bold mb-3 px-2 pt-2" style="font-family:'Poppins'; font-size: 1rem; color: var(--secondary-text);">Notification Inbox</h5>
+                
+                {% if notifications %}
+                <div class="d-flex flex-column gap-2">
+                    {% for notification in notifications %}
+                    <a href="{% url 'notification_click' notification.id %}" class="p-3 border rounded-3 position-relative d-flex align-items-start gap-3 transition-all notification-row text-decoration-none {% if not notification.is_read %}unread-notif{% endif %}" 
+                         style="border-color: var(--border-color) !important; border-radius: var(--radius) !important; background-color: {% if not notification.is_read %}#f8f9fa{% else %}var(--white){% endif %}; transition: all 0.2s ease;">
+                        
+                        <!-- Read/Unread Dot indicator -->
+                        {% if not notification.is_read %}
+                        <span class="position-absolute top-50 translate-middle-y start-0 bg-primary" 
+                              style="width: 8px; height: 8px; border-radius: 50%; margin-left: 8px;" 
+                              title="Unread"></span>
+                        {% endif %}
+                        
+                        <!-- Custom styled notification icons -->
+                        <div class="p-2.5 rounded-circle flex-shrink-0" 
+                             style="background-color: {% if 'Accepted' in notification.title or 'Confirmed' in notification.title %}#e8f5e9{% elif 'Declined' in notification.title or 'Cancelled' in notification.title %}#ffebee{% else %}#e8eaf6{% endif %}; 
+                                    color: {% if 'Accepted' in notification.title or 'Confirmed' in notification.title %}#2e7d32{% elif 'Declined' in notification.title or 'Cancelled' in notification.title %}#c62828{% else %}#3f51b5{% endif %}; 
+                                    display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: {% if not notification.is_read %}12px{% else %}0{% endif %};">
+                            {% if 'Accepted' in notification.title or 'Confirmed' in notification.title %}
+                            <i data-lucide="check" style="width: 20px; height: 20px;"></i>
+                            {% elif 'Declined' in notification.title or 'Cancelled' in notification.title %}
+                            <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+                            {% elif 'Message' in notification.title %}
+                            <i data-lucide="message-square" style="width: 20px; height: 20px;"></i>
+                            {% else %}
+                            <i data-lucide="bell" style="width: 20px; height: 20px;"></i>
+                            {% endif %}
+                        </div>
+
+                        <!-- Content details -->
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 class="mb-0 fw-semibold" style="font-size: 0.95rem; color: var(--primary-text);">{{ notification.title }}</h6>
+                                <span class="text-muted small" style="font-size: 0.75rem;">{{ notification.created_at|naturaltime }}</span>
+                            </div>
+                            <p class="mb-0 text-secondary small" style="line-height: 1.4;">{{ notification.message }}</p>
+                        </div>
+
+                        <!-- Actions (Click Indicator Chevron) -->
+                        <div class="flex-shrink-0 align-self-center ms-2 text-muted transition-all chevron-arrow" style="opacity: 0.5; transition: all 0.2s ease;">
+                            <i data-lucide="chevron-right" style="width: 18px; height: 18px;"></i>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- Empty State Illustration -->
+                <div class="text-center py-5">
+                    <div class="mb-3 d-inline-flex p-4 rounded-circle bg-light text-muted">
+                        <i data-lucide="bell-off" style="width: 48px; height: 48px;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-1" style="font-family:'Poppins'; color: var(--primary-text);">Your inbox is empty</h5>
+                    <p class="text-muted small mx-auto" style="max-width: 320px;">You are completely up-to-date! When you receive alerts or new booking notifications, they will show up here.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .notification-row:hover {
+        transform: translateY(-1.5px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        border-color: var(--primary) !important;
+    }
+    .notification-row:hover .chevron-arrow {
+        transform: translateX(3px);
+        color: var(--primary) !important;
+        opacity: 1 !important;
+    }
+    .unread-notif {
+        border-left: 3px solid var(--primary) !important;
+    }
+</style>
+{% endblock %}

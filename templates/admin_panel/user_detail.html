@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block title %}User Detail — {{ target_user.username }}{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px; min-height: 85vh;" class="container">
+    <!-- Breadcrumbs / Back button -->
+    <div class="mb-4">
+        <a href="{% if target_user.role == 'provider' %}{% url 'manage_providers' %}{% else %}{% url 'manage_users' %}{% endif %}" class="btn btn-outline-secondary btn-sm px-3 py-1.5 d-inline-flex align-items-center gap-2">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+            Back to {% if target_user.role == 'provider' %}Providers{% else %}Users{% endif %} list
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: User Card & Personal Details -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <div class="text-center pb-4 border-bottom mb-4">
+                    <!-- Avatar Initials Bubble -->
+                    <div class="rounded-circle bg-light border d-inline-flex align-items-center justify-content-center text-primary fw-bold mb-3" 
+                         style="width: 80px; height: 80px; font-size: 2rem; border-color: var(--border-color) !important;">
+                        {{ target_user.first_name|slice:":1"|upper }}{% if target_user.last_name %}{{ target_user.last_name|slice:":1"|upper }}{% else %}{{ target_user.username|slice:":1"|upper }}{% endif %}
+                    </div>
+                    
+                    <h5 class="fw-bold mb-1" style="font-family:'Poppins'; color: var(--primary-text);">
+                        {{ target_user.get_full_name|default:target_user.username }}
+                    </h5>
+                    <p class="text-muted small mb-2">@{{ target_user.username }}</p>
+                    
+                    <div class="d-flex align-items-center justify-content-center gap-2">
+                        <span class="badge rounded-pill bg-primary px-3 py-1 fw-medium" style="font-size: 0.78rem;">
+                            {{ target_user.get_role_display }}
+                        </span>
+                        {% if target_user.is_active %}
+                            <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1 fw-medium" style="font-size: 0.78rem;">Active</span>
+                        {% else %}
+                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-1 fw-medium" style="font-size: 0.78rem;">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Comprehensive Info Grid -->
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">EMAIL ADDRESS</small>
+                        <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ target_user.email|default:"Not provided" }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">PHONE NUMBER</small>
+                        <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ target_user.phone|default:"Not provided" }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">STREET ADDRESS</small>
+                        <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ target_user.address|default:"Not provided" }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">DATE REGISTERED</small>
+                        <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ target_user.date_joined|date:"M d, Y @ g:i A" }}</span>
+                    </div>
+                    <div>
+                        <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">LAST LOGIN</small>
+                        <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ target_user.last_login|date:"M d, Y @ g:i A"|default:"Never logged in" }}</span>
+                    </div>
+                </div>
+
+                <!-- Admin Actions Box -->
+                <div class="mt-4 pt-4 border-top d-flex flex-column gap-2">
+                    <form method="POST" action="{% url 'manage_users' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ target_user.id }}">
+                        {% if target_user.is_active %}
+                            <button type="submit" name="action" value="deactivate" class="btn btn-outline-danger w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2">
+                                <i data-lucide="user-minus" style="width:16px;height:16px;"></i>
+                                Deactivate Account
+                            </button>
+                        {% else %}
+                            <button type="submit" name="action" value="activate" class="btn btn-success w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2">
+                                <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
+                                Activate Account
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    <!-- Direct Chat Moderator Button -->
+                    <a href="{% url 'admin_start_chat' target_user.id %}" class="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2" style="background-color: var(--primary) !important;">
+                        <i data-lucide="message-square" style="width:16px;height:16px;"></i>
+                        Message User
+                    </a>
+                </div>
+            </div>
+
+            <!-- Provider Profile Specifications -->
+            {% if provider_profile %}
+                <div class="card shadow-sm border-0 p-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                        <i data-lucide="briefcase" class="me-2 text-primary" style="width:20px;height:20px;"></i>
+                        Business Profile
+                    </h5>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        <div>
+                            <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">BUSINESS NAME</small>
+                            <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ provider_profile.business_name|default:"Not specified" }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">SPECIALIZATION / SKILL</small>
+                            <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ provider_profile.skill|default:"Not specified" }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">EXPERIENCE WORK LEVEL</small>
+                            <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ provider_profile.experience }} year{{ provider_profile.experience|pluralize }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">OPERATIONAL CITY / LOCATION</small>
+                            <span class="text-dark fw-medium" style="font-size: 0.9rem;">{{ provider_profile.location|default:"Not specified" }}</span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">VERIFICATION STATUS</small>
+                            {% if provider_profile.is_verified %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2.5 mt-1 small">Verified Business</span>
+                            {% else %}
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 px-2.5 mt-1 small">Unverified</span>
+                            {% endif %}
+                        </div>
+                        {% if provider_profile.bio %}
+                            <div>
+                                <small class="text-muted d-block uppercase tracking-wider font-semibold" style="font-size: 0.72rem;">ABOUT / BIO</small>
+                                <p class="text-muted mb-0 mt-1 small" style="line-height:1.5;">{{ provider_profile.bio }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Provider Verification Actions -->
+                    <div class="mt-4 pt-4 border-top">
+                        <form method="POST" action="{% url 'manage_providers' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="provider_id" value="{{ provider_profile.id }}">
+                            {% if provider_profile.is_verified %}
+                                <button type="submit" name="action" value="unverify" class="btn btn-outline-warning w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2">
+                                    <i data-lucide="shield-alert" style="width:16px;height:16px;"></i>
+                                    Remove Verification
+                                </button>
+                            {% else %}
+                                <button type="submit" name="action" value="verify" class="btn btn-success w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2">
+                                    <i data-lucide="shield-check" style="width:16px;height:16px;"></i>
+                                    Verify Provider
+                                </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Booking History & Services -->
+        <div class="col-lg-8">
+            <!-- Bookings List Card -->
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <h5 class="fw-bold mb-4 d-flex align-items-center" style="font-family:'Poppins'; color: var(--primary-text);">
+                    <i data-lucide="calendar" class="me-2 text-primary" style="width:22px;height:22px;"></i>
+                    Service Booking History ({{ bookings|length }})
+                </h5>
+
+                {% if bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-modern align-middle mb-0" style="font-size: 0.9rem;">
+                            <thead>
+                                <tr class="text-muted">
+                                    <th>Booking ID</th>
+                                    <th>Service</th>
+                                    <th>{% if target_user.role == 'provider' %}Customer{% else %}Provider{% endif %}</th>
+                                    <th>Date &amp; Slot</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <!-- Scrollable container for table body -->
+                        <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                            <table class="table table-modern align-middle mb-0" style="font-size: 0.9rem;">
+                                <tbody>
+                                    {% for b in bookings %}
+                                        <tr>
+                                            <td><strong>#{{ b.id }}</strong></td>
+                                            <td>
+                                                <div class="fw-semibold text-dark">{{ b.service.service_name }}</div>
+                                                <small class="text-muted">{{ b.service.category|title }}</small>
+                                            </td>
+                                            <td>
+                                                {% if target_user.role == 'provider' %}
+                                                    {{ b.user.get_full_name|default:b.user.username }}
+                                                {% else %}
+                                                    {{ b.provider.user.get_full_name|default:b.provider.user.username }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div>{{ b.booking_date }}</div>
+                                                <small class="text-secondary fw-medium">{{ b.get_time_slot_display }}</small>
+                                            </td>
+                                            <td>
+                                                {% if b.status == 'confirmed' %}
+                                                    <span class="badge rounded-pill bg-primary-subtle text-primary py-1 px-2.5">Confirmed</span>
+                                                {% elif b.status == 'completed' %}
+                                                    <span class="badge rounded-pill bg-success-subtle text-success py-1 px-2.5">Completed</span>
+                                                {% elif b.status == 'cancelled' %}
+                                                    <span class="badge rounded-pill bg-danger-subtle text-danger py-1 px-2.5">Cancelled</span>
+                                                {% else %}
+                                                    <span class="badge rounded-pill bg-light text-secondary py-1 px-2.5">{{ b.status|title }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-end">
+                                                <a href="{% url 'admin_booking_detail' b.id %}" class="btn btn-sm btn-light border px-2.5 py-1.5" style="border-radius:var(--radius-sm);">
+                                                    Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-3 d-inline-flex p-3 rounded-circle bg-light text-muted">
+                            <i data-lucide="calendar" style="width: 32px; height: 32px; stroke-width:1.5;"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">No Bookings Found</h6>
+                        <p class="text-muted small mb-0">This profile has not logged or completed any bookings yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Provider's Catalog List Card -->
+            {% if provider_profile %}
+                <div class="card shadow-sm border-0 p-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                    <h5 class="fw-bold mb-4 d-flex align-items-center" style="font-family:'Poppins'; color: var(--primary-text);">
+                        <i data-lucide="tag" class="me-2 text-primary" style="width:22px;height:22px;"></i>
+                        Listed Services ({{ services|length }})
+                    </h5>
+
+                    {% if services %}
+                        <div class="d-flex flex-column gap-3">
+                            {% for s in services %}
+                                <div class="p-3 border rounded d-flex align-items-center justify-content-between" style="border-color: var(--border-color) !important; border-radius: var(--radius);">
+                                    <div>
+                                        <h6 class="mb-1 fw-bold text-dark">{{ s.service_name }}</h6>
+                                        <p class="text-muted mb-0 small" style="line-height:1.4;">{{ s.description|truncatewords:20 }}</p>
+                                    </div>
+                                    <div class="text-end ms-3">
+                                        <span class="fs-5 fw-bold text-primary">${{ s.price }}</span>
+                                        <small class="text-muted d-block">per hour</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3 d-inline-flex p-3 rounded-circle bg-light text-muted">
+                                <i data-lucide="tag" style="width: 32px; height: 32px; stroke-width:1.5;"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">No Services Listed</h6>
+                            <p class="text-muted small mb-0">This provider has not set up their catalog services yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users — HyperLocal Admin{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="users" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Manage Users</h4>
+    <div class="card p-4">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Action</th></tr></thead>
+            </table>
+            <!-- Scrollable container for table body -->
+            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                <table class="table table-modern mb-0">
+                    <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>{{ u.id }}</td>
+                        <td><a href="{% url 'admin_user_detail' u.id %}" class="fw-bold text-primary text-decoration-none" title="View Full Details">{{ u.username }}</a></td>
+                        <td>{{ u.get_full_name|default:"—" }}</td>
+                        <td>{{ u.email|default:"—" }}</td>
+                        <td><span class="badge badge-confirmed">{{ u.get_role_display }}</span></td>
+                        <td>{% if u.is_active %}<span class="badge badge-completed">Active</span>{% else %}<span class="badge badge-cancelled">Inactive</span>{% endif %}</td>
+                        <td>
+                            <form method="POST" class="d-inline">{% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ u.id }}">
+                                {% if u.is_active %}
+                                <button name="action" value="deactivate" class="btn btn-sm btn-outline-danger">Deactivate</button>
+                                {% else %}
+                                <button name="action" value="activate" class="btn btn-sm btn-primary">Activate</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

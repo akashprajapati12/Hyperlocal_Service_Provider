@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Admin Dashboard — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-1" style="font-family:'Poppins'">Admin Dashboard</h4>
+    <p class="text-muted mb-4">Platform overview and analytics</p>
+
+    <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-stretch">
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="users"></i></div>
+            <div>
+                <div class="stat-value">{{ total_users }}</div>
+                <div class="stat-label">Customers</div>
+            </div>
+        </div>
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="award"></i></div>
+            <div>
+                <div class="stat-value">{{ total_providers }}</div>
+                <div class="stat-label">Providers</div>
+            </div>
+        </div>
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="calendar"></i></div>
+            <div>
+                <div class="stat-value">{{ total_bookings }}</div>
+                <div class="stat-label">Bookings</div>
+            </div>
+        </div>
+        <div class="stat-card flex-fill">
+            <div class="stat-icon"><i data-lucide="indian-rupee"></i></div>
+            <div>
+                <div class="stat-value">₹{{ total_revenue|floatformat:0 }}</div>
+                <div class="stat-label">Revenue</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <h6 class="mb-3" style="font-family:'Poppins';">Revenue Trend</h6>
+                <canvas id="revenueChart" height="250"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h6 class="mb-3" style="font-family:'Poppins';">Booking Status</h6>
+                <canvas id="statusChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h6 class="mb-3" style="font-family:'Poppins';">Service Categories</h6>
+                <canvas id="catChart" height="250"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <h6 class="mb-3" style="font-family:'Poppins';">Recent Bookings</h6>
+                <div class="table-responsive recent-bookings-scroll">
+                    <table class="table table-modern mb-0">
+                        <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                    </table>
+                    <!-- Scrollable container for table body -->
+                    <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                        <table class="table table-modern mb-0">
+                            <tbody>
+                            {% for b in recent_bookings %}
+                            <tr>
+                                <td><a href="{% url 'admin_booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
+                                <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+                                <td>{{ b.service.service_name }}</td>
+                                <td>{{ b.booking_date }}</td>
+                                <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
+                                <td class="text-end">
+                                    <a href="{% url 'admin_booking_detail' b.id %}" class="btn btn-sm btn-outline-primary py-1 px-2">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script id="chart-labels-data" type="application/json">{{ chart_labels|safe }}</script>
+<script id="chart-revenue-data" type="application/json">{{ chart_data|safe }}</script>
+<script id="status-labels-data" type="application/json">{{ status_labels|safe }}</script>
+<script id="status-data-data" type="application/json">{{ status_data|safe }}</script>
+<script id="cat-labels-data" type="application/json">{{ cat_labels|safe }}</script>
+<script id="cat-data-data" type="application/json">{{ cat_data|safe }}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const primary='#111111', grey1='#444444', grey2='#666666', grey3='#888888', grey4='#AAAAAA', grey5='#CCCCCC', grey6='#EFEFEF';
+
+const chartLabels = JSON.parse(document.getElementById('chart-labels-data').textContent);
+const chartData = JSON.parse(document.getElementById('chart-revenue-data').textContent);
+const statusLabels = JSON.parse(document.getElementById('status-labels-data').textContent);
+const statusData = JSON.parse(document.getElementById('status-data-data').textContent);
+const catLabels = JSON.parse(document.getElementById('cat-labels-data').textContent);
+const catData = JSON.parse(document.getElementById('cat-data-data').textContent);
+
+// Revenue Chart
+new Chart(document.getElementById('revenueChart'),{type:'line',data:{labels:chartLabels,datasets:[{label:'Revenue (₹)',data:chartData,borderColor:primary,backgroundColor:'rgba(17,17,17,0.04)',fill:true,tension:0.4,pointBackgroundColor:primary}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+// Status Chart
+new Chart(document.getElementById('statusChart'),{type:'doughnut',data:{labels:statusLabels,datasets:[{data:statusData,backgroundColor:[grey3,primary,grey1,grey4]}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+// Category Chart
+new Chart(document.getElementById('catChart'),{type:'polarArea',data:{labels:catLabels,datasets:[{data:catData,backgroundColor:[primary,grey1,grey2,grey3,grey4,grey5]}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}});
+</script>
+{% endblock %}

@@ -1,0 +1,211 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Hyperlocal Service Provider - Trusted local service professionals near you.">
+    <title>{% block title %}Hyperlocal Services{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=15.0">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-glass fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
+            <i data-lucide="map-pin" class="me-2" style="width:20px;height:20px;stroke-width:1.8;vertical-align:-2px;"></i><span class="brand-hyper">Hyper</span><span class="brand-local">Local</span>
+        </a>
+        
+        {% if user.is_authenticated %}
+        <div class="ms-auto ms-lg-0 me-2 order-lg-3 d-flex align-items-center d-lg-none">
+            <a class="navbar-notification-btn me-2" href="{% url 'notifications' %}" title="Notifications">
+                <i data-lucide="bell" style="width:16px;height:16px;stroke-width:2.2;"></i>
+                {% if unread_notifications_count > 0 %}
+                <span class="navbar-notification-badge">{{ unread_notifications_count }}</span>
+                {% endif %}
+            </a>
+            <div class="navbar-profile-btn">
+                <a class="d-flex align-items-center justify-content-center" href="{% url 'profile' %}" title="Profile">
+                    <i data-lucide="user" style="width:16px;height:16px;stroke-width:2.2;"></i>
+                    <span class="brand-username ms-1 fw-medium">{{ user.first_name|default:user.username }}</span>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <button class="navbar-toggler border-0 order-lg-4" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse order-lg-2" id="mainNav">
+            <ul class="navbar-nav ms-auto align-items-center gap-1 gap-lg-3">
+                {% if user.is_authenticated %}
+                    {% if user.role == 'customer' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'service_list' %}">Services</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'customer_dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'booking_history' %}">My Bookings</a></li>
+                    {% elif user.role == 'provider' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'provider_dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'my_services' %}">My Services</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'manage_requests' %}">Requests</a></li>
+                    {% elif user.role == 'admin' %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'manage_users' %}">Users</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'manage_providers' %}">Providers</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'manage_bookings' %}">Bookings</a></li>
+                    {% endif %}
+                    
+                    <li class="nav-item d-none d-lg-block">
+                        <a class="navbar-notification-btn" href="{% url 'notifications' %}" title="Notifications">
+                            <i data-lucide="bell" style="width:16px;height:16px;stroke-width:2.2;"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="navbar-notification-badge">{{ unread_notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    <li class="nav-item d-none d-lg-block">
+                        <div class="navbar-profile-btn">
+                            <a class="d-flex align-items-center justify-content-center" href="{% url 'profile' %}" title="Profile">
+                                <i data-lucide="user" style="width:16px;height:16px;stroke-width:2.2;"></i>
+                                <span class="brand-username ms-1 fw-medium">{{ user.first_name|default:user.username }}</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="nav-item"><a class="btn btn-outline-danger btn-sm" href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'service_list' %}">Services</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-primary btn-sm ms-1" href="{% url 'register' %}">Sign Up</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% if messages %}
+<div id="messages-container" class="container" style="margin-top:80px;position:relative;z-index:1050;overflow:hidden;">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main class="main-content">
+    {% block content %}{% endblock %}
+</main>
+
+{% block footer %}
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <h5 class="d-flex align-items-center">
+                    <i data-lucide="map-pin" class="me-2" style="width:18px;height:18px;stroke-width:1.8;"></i>HyperLocal
+                </h5>
+                <p class="mb-0 text-muted">Trusted local service professionals near you. Premium quality services at your doorstep.</p>
+            </div>
+            <div class="col-lg-4">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'home' %}">Home</a></li>
+                    <li class="mb-2"><a href="{% url 'service_list' %}">Services</a></li>
+                    <li class="mb-2"><a href="{% url 'about' %}">About Us</a></li>
+                    <li class="mb-2"><a href="{% url 'contact' %}">Contact Us</a></li>
+                    <li class="mb-2"><a href="{% url 'feedback' %}">Feedback</a></li>
+                    {% if not user.is_authenticated %}
+                        <li class="mb-2"><a href="{% url 'register' %}">Sign Up</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="col-lg-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2 d-flex align-items-center">
+                        <i data-lucide="mail" class="me-2" style="width:16px;height:16px;stroke-width:1.8;"></i>support@hyperlocal.com
+                    </li>
+                    <li class="mb-2 d-flex align-items-center">
+                        <i data-lucide="phone" class="me-2" style="width:16px;height:16px;stroke-width:1.8;"></i>+91 9334306124
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom text-center">
+            <small>&copy; 2026 HyperLocal Services. All rights reserved.</small>
+        </div>
+    </div>
+</footer>
+{% endblock %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Lucide Icons CDN -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    // Initialize Lucide icons
+    // Auto-dismiss alerts after 5 seconds and shift page content up smoothly
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize Lucide icons
+        lucide.createIcons();
+        
+        const container = document.getElementById("messages-container");
+        if (container) {
+            setTimeout(() => {
+                const alerts = container.querySelectorAll('.alert');
+                if (alerts.length === 0) return;
+                
+                let closedCount = 0;
+                alerts.forEach(alert => {
+                    alert.addEventListener('closed.bs.alert', () => {
+                        closedCount++;
+                        if (closedCount === alerts.length) {
+                            // Smoothly shift the page up by collapsing container margin/height
+                            container.style.height = container.offsetHeight + "px";
+                            container.offsetHeight; // Force reflow
+                            
+                            container.style.transition = "all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)";
+                            container.style.height = "0";
+                            container.style.marginTop = "0";
+                            container.style.marginBottom = "0";
+                            container.style.paddingTop = "0";
+                            container.style.paddingBottom = "0";
+                            container.style.opacity = "0";
+                            
+                            setTimeout(() => {
+                                container.remove();
+                            }, 500);
+                        }
+                    });
+                    
+                    const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+                    if (bsAlert) {
+                        bsAlert.close();
+                    }
+                });
+            }, 2000);
+        }
+    });
+</script>
+<script src="{% static 'js/main.js' %}"></script>
+{% if user.is_authenticated %}
+<!-- Floating Chat FAB -->
+<a href="{% url 'chat_inbox' %}" class="floating-chat-fab" title="Chat Inbox">
+    <i data-lucide="message-square"></i>
+    {% if unread_chat_notifications_count > 0 %}
+    <span class="floating-chat-badge">{{ unread_chat_notifications_count }}</span>
+    {% endif %}
+</a>
+{% endif %}
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

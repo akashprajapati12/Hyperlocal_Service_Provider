@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}{{ service.service_name }} — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row g-4">
+        <!-- Service Info -->
+        <div class="col-lg-8">
+            <div class="card p-4 mb-4">
+                <span class="category-badge mb-3 d-inline-block align-self-start">{{ service.get_category_display }}</span>
+                <h2 style="font-family:'Poppins'">{{ service.service_name }}</h2>
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="rating-stars d-flex gap-1 align-items-center">
+                        {% for i in rating_range %}
+                            {% if i <= avg_rating %}
+                                <i data-lucide="star" style="width:14px;height:14px;fill:currentColor;stroke-width:2;"></i>
+                            {% else %}
+                                <i data-lucide="star" style="width:14px;height:14px;stroke-width:1.5;color:var(--gray-300);"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    <span class="text-muted small">{{ avg_rating }} ({{ review_count }} reviews)</span>
+                </div>
+                <p class="mb-4 text-muted" style="line-height:1.7">{{ service.description }}</p>
+                <div class="d-flex align-items-center justify-content-between pt-3 border-top">
+                    <span class="price-tag" style="font-size:1.35rem">₹{{ service.price }}</span>
+                    {% if user.is_authenticated and user.role == 'customer' %}
+                    <a href="{% url 'create_booking' service.id %}" class="btn btn-primary btn-lg d-flex align-items-center"><i data-lucide="calendar" class="me-2" style="width:18px;height:18px;"></i>Book Now</a>
+                    {% elif not user.is_authenticated %}
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login to Book</a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Reviews -->
+            <div class="card p-4">
+                <h5 class="mb-4" style="font-family:'Poppins'">Reviews ({{ review_count }})</h5>
+                {% for review in reviews %}
+                <div class="border-bottom pb-3 mb-3">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <strong style="font-size:.9rem;">{{ review.user.get_full_name|default:review.user.username }}</strong>
+                        <span class="rating-stars d-flex gap-1 align-items-center" style="font-size:.85rem">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i data-lucide="star" style="width:11px;height:11px;fill:currentColor;stroke-width:2;"></i>
+                                {% else %}
+                                    <i data-lucide="star" style="width:11px;height:11px;stroke-width:1.5;color:var(--gray-300);"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        <small class="text-muted ms-auto" style="font-size:.75rem;">{{ review.review_date|timesince }} ago</small>
+                    </div>
+                    <p class="mb-0 text-muted small">{{ review.comment }}</p>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-3 small">No reviews yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Provider Info Sidebar -->
+        <div class="col-lg-4">
+            <div class="card p-4">
+                <h6 class="text-muted text-uppercase mb-4" style="letter-spacing:1px;font-size:.75rem;font-weight:600;">Service Provider</h6>
+                <div class="text-center mb-4">
+                    {% if service.provider.user.profile_pic %}
+                    <img src="{{ service.provider.user.profile_pic.url }}" class="rounded-circle mb-2" width="72" height="72" style="object-fit:cover;border:1px solid var(--border-color)">
+                    {% else %}
+                    <div class="avatar-placeholder mx-auto mb-2" style="width:72px;height:72px;font-size:1.6rem;background:var(--secondary-bg);color:var(--primary-text);border:1px solid var(--border-color);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;">{{ service.provider.user.first_name|first|default:"P" }}</div>
+                    {% endif %}
+                    <h5 class="mb-1" style="font-size:1.05rem;">{{ service.provider.user.get_full_name|default:service.provider.user.username }}</h5>
+                    {% if service.provider.is_verified %}
+                    <span class="badge badge-verified d-inline-flex align-items-center mt-1"><i data-lucide="shield-check" class="me-1" style="width:12px;height:12px;"></i>Verified</span>
+                    {% endif %}
+                </div>
+                <ul class="list-unstyled mb-0 d-flex flex-column gap-3">
+                    <li class="d-flex align-items-center small"><i data-lucide="wrench" class="me-2 text-muted" style="width:16px;height:16px;"></i>{{ service.provider.skill }}</li>
+                    <li class="d-flex align-items-center small"><i data-lucide="map-pin" class="me-2 text-muted" style="width:16px;height:16px;"></i>{{ service.provider.location }}</li>
+                    <li class="d-flex align-items-center small">
+                        {% if service.provider.availability_status %}
+                        <i data-lucide="check-circle" class="me-2" style="width:16px;height:16px;color:#007A54;"></i><span class="text-muted">Available Now</span>
+                        {% else %}
+                        <i data-lucide="x-circle" class="me-2" style="width:16px;height:16px;color:#B30000;"></i><span class="text-muted">Currently Unavailable</span>
+                        {% endif %}
+                    </li>
+                </ul>
+                {% if service.provider.bio %}
+                <hr class="my-3">
+                <p class="text-muted small mb-0" style="line-height:1.6;">{{ service.provider.bio }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

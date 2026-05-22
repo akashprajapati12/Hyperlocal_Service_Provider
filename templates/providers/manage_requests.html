@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Manage Requests — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="inbox" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Booking Requests</h4>
+    <div class="card p-4">
+        {% if bookings %}
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead>
+
+            </table>
+            <!-- Scrollable container for table body -->
+            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                <table class="table table-modern mb-0">
+                    <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td><a href="{% url 'booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
+                        <td>{{ b.user.get_full_name|default:b.user.username }}</td>
+                        <td>{{ b.service.service_name }}</td>
+                        <td>{{ b.booking_date }}</td>
+                        <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
+                        <td>
+                            {% if b.payment %}
+                                <span class="badge {% if b.payment.payment_status == 'paid' %}bg-success{% else %}bg-warning text-dark{% endif %} px-2.5 py-1" style="font-size: 0.75rem;">
+                                    {{ b.payment.get_payment_method_display }}: {{ b.payment.get_payment_status_display }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted small">No payment info</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if b.status == 'pending' %}
+                            <form method="POST" class="d-inline-flex gap-2">{% csrf_token %}
+                                <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                <button name="action" value="accept" class="btn btn-sm btn-primary d-inline-flex align-items-center"><i data-lucide="check" class="me-1" style="width:14px;height:14px;"></i> Accept</button>
+                                <button name="action" value="reject" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center"><i data-lucide="x" class="me-1" style="width:14px;height:14px;"></i> Reject</button>
+                            </form>
+                            {% elif b.status == 'confirmed' %}
+                            <div class="d-inline-flex flex-wrap gap-2">
+                                <form method="POST" class="d-inline">{% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                    <button name="action" value="complete" class="btn btn-sm btn-primary d-inline-flex align-items-center"><i data-lucide="check-circle" class="me-1" style="width:14px;height:14px;"></i> Complete</button>
+                                </form>
+                                <a href="{% url 'booking_chat' b.id %}" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"><i data-lucide="message-square" class="me-1" style="width:14px;height:14px;"></i> Chat</a>
+                                {% if b.payment and b.payment.payment_status == 'pending' %}
+                                <form method="POST" class="d-inline">{% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                    <button name="action" value="approve_payment" class="btn btn-sm btn-success d-inline-flex align-items-center"><i data-lucide="check" class="me-1" style="width:14px;height:14px;"></i> Approve Payment</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="d-inline-flex flex-wrap gap-2 align-items-center">
+                                <a href="{% url 'booking_detail' b.id %}" class="btn btn-sm btn-outline-secondary">View Details</a>
+                                {% if b.payment and b.payment.payment_status == 'pending' and b.status != 'cancelled' %}
+                                <form method="POST" class="d-inline">{% csrf_token %}
+                                    <input type="hidden" name="booking_id" value="{{ b.id }}">
+                                    <button name="action" value="approve_payment" class="btn btn-sm btn-success d-inline-flex align-items-center"><i data-lucide="check" class="me-1" style="width:14px;height:14px;"></i> Approve Payment</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-4 text-muted">
+            <i data-lucide="inbox" class="mx-auto d-block mb-2" style="width:40px;height:40px;stroke-width:1.5;"></i>
+            <p class="mt-2 small">No booking requests yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}

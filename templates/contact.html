@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - HyperLocal{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 120px;">
+    <!-- Minimal Header -->
+    <div class="text-center mb-5">
+        <span class="badge bg-light text-dark px-3 py-2 border mb-3">GET IN TOUCH</span>
+        <h1 class="display-5 fw-bold text-dark tracking-tight">Contact <span class="accent-outline" style="-webkit-text-stroke: 1.5px var(--primary-text); color: transparent; font-weight: 300;">Us</span></h1>
+        <p class="text-muted mx-auto" style="max-width: 600px; font-size: 1.1rem; line-height: 1.6;">
+            Have questions about bookings, payments, or provider onboarding? Our operations team is here to assist you.
+        </p>
+    </div>
+
+    <div class="row g-5 mb-5">
+        <!-- Contact Information (Left) -->
+        <div class="col-lg-5">
+            <div class="p-4 border rounded-3 bg-light h-100" style="border-radius: var(--radius-lg) !important;">
+                <h4 class="fw-bold mb-4">Contact Information</h4>
+                
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i data-lucide="mail" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Email Address</h6>
+                        <a href="mailto:support@hyperlocal.com" class="text-secondary small">support@hyperlocal.com</a>
+                        <p class="text-muted small mb-0">For general inquiries, account support, and booking updates.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i data-lucide="phone" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Phone Number</h6>
+                        <a href="tel:+919334306124" class="text-secondary small">+91 9334306124</a>
+                        <p class="text-muted small mb-0">Monday to Saturday, 9:00 AM to 6:00 PM IST.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 mb-4">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i data-lucide="map-pin" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Office Address</h6>
+                        <p class="text-secondary small mb-1">Mithanpura, Club Road, Muzaffarpur, Bihar, 842002</p>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <div class="p-2 bg-white border rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i data-lucide="clock" class="text-dark" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Operating Hours</h6>
+                        <p class="text-muted small mb-0">Our platform operates 24/7. Our support helpline is open Monday to Saturday, 9 AM - 6 PM.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form (Right) -->
+        <div class="col-lg-7">
+            <div class="p-4 border rounded-3 bg-white" style="border-radius: var(--radius-lg) !important;">
+                <h4 class="fw-bold mb-4">Send Us a Message</h4>
+                
+                <form method="POST" action="{% url 'contact' %}">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="name" class="form-label small fw-semibold text-secondary">Full Name</label>
+                                <input type="text" id="name" name="name" class="form-control" placeholder="Enter your name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
+                                <input type="email" id="email" name="email" class="form-control" placeholder="Enter your email" required>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="subject" class="form-label small fw-semibold text-secondary">Subject</label>
+                                <input type="text" id="subject" name="subject" class="form-control" placeholder="What is this regarding?" required>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="message" class="form-label small fw-semibold text-secondary">Message</label>
+                                <textarea id="message" name="message" class="form-control" rows="5" placeholder="Write your message here..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary w-100 py-2.5">Send Message</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

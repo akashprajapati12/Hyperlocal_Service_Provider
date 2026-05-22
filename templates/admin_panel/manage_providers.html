@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Manage Providers — HyperLocal Admin{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="award" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Manage Providers</h4>
+    <div class="card p-4">
+        <div class="table-responsive">
+            <table class="table table-modern mb-0">
+                <thead><tr><th>ID</th><th>Name</th><th>Skill</th><th>Location</th><th>Document</th><th>Verified</th><th>Action</th></tr></thead>
+            </table>
+            <!-- Scrollable container for table body -->
+            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
+                <table class="table table-modern mb-0">
+                    <tbody>
+                    {% for p in providers %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td><a href="{% url 'admin_user_detail' p.user.id %}" class="fw-bold text-primary text-decoration-none" title="View Full Details">{{ p.user.get_full_name|default:p.user.username }}</a></td>
+                        <td>{{ p.skill }}</td>
+                        <td>{{ p.location }}</td>
+                        <td>
+                            {% if p.document %}
+                            <a href="{{ p.document.url }}" target="_blank" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"><i data-lucide="file-text" class="me-1" style="width:14px;height:14px;"></i>View</a>
+                            {% else %}
+                            <span class="text-muted small">No document</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if p.is_verified %}<span class="badge badge-verified">Verified</span>{% else %}<span class="badge badge-unverified">Pending</span>{% endif %}</td>
+                        <td>
+                            <form method="POST" class="d-inline">{% csrf_token %}
+                                <input type="hidden" name="provider_id" value="{{ p.id }}">
+                                {% if p.is_verified %}
+                                <button name="action" value="unverify" class="btn btn-sm btn-outline-danger">Unverify</button>
+                                {% else %}
+                                <button name="action" value="verify" class="btn btn-sm btn-primary d-inline-flex align-items-center"><i data-lucide="shield-check" class="me-1" style="width:14px;height:14px;"></i>Verify</button>
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card p-4">
+                <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="edit-3" class="me-2" style="vertical-align:-2px;"></i>Edit Profile</h4>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Current Picture Preview -->
+                    <div class="text-center mb-4">
+                        {% if user.profile_pic %}
+                        <img src="{{ user.profile_pic.url }}" alt="Profile" class="rounded-circle mb-2" style="width:80px;height:80px;object-fit:cover;border:1px solid var(--border-color)">
+                        {% else %}
+                        <div class="mx-auto mb-2" style="width:80px;height:80px;border-radius:50%;background-color:var(--secondary-bg);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--primary-text);font-weight:600">
+                            {{ user.first_name|first|default:user.username|first|upper }}
+                        </div>
+                        {% endif %}
+                        <small class="text-muted d-block">{{ user.username }}</small>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Profile Picture</label>
+                            {{ form.profile_pic }}
+                        </div>
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <a href="{% url 'profile' %}" class="btn btn-outline-primary ms-2">Cancel</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

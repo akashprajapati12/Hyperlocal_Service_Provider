@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Payment Confirmed — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card p-4 text-center">
+                {% if payment.payment_status == 'paid' %}
+                <div class="mb-3 text-success d-flex justify-content-center">
+                    <i data-lucide="check-circle" style="width:56px;height:56px;stroke-width:1.5;"></i>
+                </div>
+                <h3 style="font-family:'Poppins'">Payment Successful!</h3>
+                <p class="text-muted small mb-4">Your booking has been confirmed and payment has been processed successfully.</p>
+                {% else %}
+                <div class="mb-3 text-warning d-flex justify-content-center">
+                    <i data-lucide="clock" style="width:56px;height:56px;stroke-width:1.5;"></i>
+                </div>
+                <h3 style="font-family:'Poppins'">Booking Confirmed!</h3>
+                <p class="text-muted small mb-4">Your booking is registered. Payment is pending provider confirmation.</p>
+                {% endif %}
+                
+                <div class="p-3 text-start mb-4" style="background-color:var(--secondary-bg); border:1px solid var(--border-color); border-radius:var(--radius)">
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Booking ID</span><strong class="small">#{{ booking.id }}</strong></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Service</span><strong class="small">{{ booking.service.service_name }}</strong></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Provider</span><span class="small">{{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</span></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Date</span><span class="small">{{ booking.booking_date }}</span></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Payment Method</span><span class="small">{{ payment.get_payment_method_display }}</span></div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted small">Payment Status</span>
+                        <span class="badge {% if payment.payment_status == 'paid' %}bg-success{% else %}bg-warning text-dark{% endif %} small">
+                            {{ payment.get_payment_status_display }}
+                        </span>
+                    </div>
+                    <hr class="my-2" style="border-color:var(--border-color);">
+                    {% if payment.payment_status == 'paid' %}
+                    <div class="d-flex justify-content-between align-items-center"><span class="fw-bold small">Amount Paid</span><span class="price-tag">₹{{ payment.amount }}</span></div>
+                    {% else %}
+                    <div class="d-flex justify-content-between align-items-center"><span class="fw-bold small">Amount Due</span><span class="price-tag">₹{{ payment.amount }}</span></div>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{% url 'booking_detail' booking.id %}" class="btn btn-primary">View Booking</a>
+                    <a href="{% url 'service_list' %}" class="btn btn-outline-primary">Browse More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

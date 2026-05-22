@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% block title %}Booking #{{ booking.id }} Details — Admin Panel{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px; min-height: 85vh;" class="container">
+    <!-- Breadcrumbs / Back button -->
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <a href="{% url 'manage_bookings' %}" class="btn btn-outline-secondary btn-sm px-3 py-1.5 d-inline-flex align-items-center gap-2">
+            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i>
+            Back to Bookings list
+        </a>
+        <a href="{% url 'admin_dashboard' %}" class="btn btn-sm btn-light border px-3 py-1.5 d-inline-flex align-items-center gap-2">
+            <i data-lucide="layout-dashboard" style="width:16px;height:16px;"></i>
+            Dashboard
+        </a>
+    </div>
+
+    <!-- Dispute Banner -->
+    {% if booking.is_disputed %}
+        <div class="card border-danger bg-danger-subtle text-danger-emphasis p-4 mb-4" style="border-radius: var(--radius-lg); border-left: 5px solid #dc3545 !important;">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="p-2 bg-danger text-white rounded-circle">
+                        <i data-lucide="alert-triangle" style="width: 24px; height: 24px;"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1" style="font-family:'Poppins';">Dispute Raised for Booking #{{ booking.id }}</h5>
+                        <p class="mb-0 small opacity-90">
+                            The customer has raised a dispute regarding this booking. As an administrator, you have permission to view the secure chat history log below, moderate the conversation, and interact with the customer and provider directly.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'booking_chat' booking.id %}" class="btn btn-danger d-inline-flex align-items-center justify-content-center gap-2 py-2 px-4 shadow-sm w-100">
+                        <i data-lucide="message-square" style="width:18px;height:18px;"></i>
+                        Join &amp; Moderate Dispute Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Left Column: Status, Tracker, Billing, Reviews -->
+        <div class="col-lg-5">
+            <!-- Booking Card Overview -->
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
+                    <div>
+                        <span class="text-muted d-block small" style="font-size: 0.75rem;">BOOKING ID</span>
+                        <h4 class="fw-bold mb-0" style="font-family:'Poppins';">#{{ booking.id }}</h4>
+                    </div>
+                    <div>
+                        <span class="badge badge-{{ booking.status }} px-3 py-2 fw-medium fs-7">{{ booking.get_status_display }}</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Status Tracker -->
+                <h6 class="fw-bold mb-3 small tracking-wider text-uppercase text-muted" style="font-size: 0.72rem;">Status Progress</h6>
+                <div class="status-tracker mb-4" style="margin: 1rem 0;">
+                    <div class="status-step {% if booking.status == 'pending' %}active{% elif booking.status != 'cancelled' %}completed{% endif %}">
+                        <div class="step-dot"><i data-lucide="hourglass" style="width:12px;height:12px;"></i></div>
+                        <div class="step-label" style="font-size: 0.7rem;">Pending</div>
+                    </div>
+                    <div class="status-step {% if booking.status == 'confirmed' %}active{% elif booking.status == 'completed' %}completed{% endif %}">
+                        <div class="step-dot"><i data-lucide="check" style="width:12px;height:12px;"></i></div>
+                        <div class="step-label" style="font-size: 0.7rem;">Confirmed</div>
+                    </div>
+                    <div class="status-step {% if booking.status == 'completed' %}active completed{% endif %}">
+                        <div class="step-dot"><i data-lucide="check-circle" style="width:12px;height:12px;"></i></div>
+                        <div class="step-label" style="font-size: 0.7rem;">Completed</div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2.5 small pt-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Created Date:</span>
+                        <span class="fw-semibold text-dark">{{ booking.created_at|date:"M d, Y @ g:i A" }}</span>
+                    </div>
+                    {% if booking.completed_at %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Completed Date:</span>
+                            <span class="fw-semibold text-dark">{{ booking.completed_at|date:"M d, Y @ g:i A" }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Disputed Status:</span>
+                        {% if booking.is_disputed %}
+                            <span class="fw-bold text-danger"><i data-lucide="alert-octagon" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-2px;"></i>Under Dispute</span>
+                        {% else %}
+                            <span class="text-success fw-medium">No disputes raised</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Global Action Links -->
+                <div class="mt-4 pt-3 border-top d-flex gap-2">
+                    <a href="{% url 'booking_chat' booking.id %}" class="btn btn-primary flex-fill d-inline-flex align-items-center justify-content-center gap-2 py-2" style="background-color: var(--primary) !important;">
+                        <i data-lucide="message-square" style="width:16px;height:16px;"></i>
+                        Open Chat
+                    </a>
+                </div>
+            </div>
+
+            <!-- Billing & Payment Details -->
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <h5 class="fw-bold mb-4 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                    <i data-lucide="receipt" class="me-2 text-primary" style="width:20px;height:20px;"></i>
+                    Billing &amp; Financial Summary
+                </h5>
+
+                <div class="p-3 border rounded mb-4" style="background-color: var(--secondary-bg); border-color: var(--border-color) !important;">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-secondary small">Base Service Fee</span>
+                        <span class="small fw-semibold">₹{{ booking.service.price }}</span>
+                    </div>
+                    {% if booking.extra_hours > 0.00 %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-secondary small">Overtimelogged ({% if booking.extra_hours_part > 0 %}{{ booking.extra_hours_part }}h {% endif %}{% if booking.extra_minutes_part > 0 %}{{ booking.extra_minutes_part }}m{% endif %})</span>
+                            <span class="small fw-semibold text-danger">+₹{{ booking.extra_charges }}</span>
+                        </div>
+                    {% endif %}
+                    <hr class="my-2" style="border-color: var(--border-color);">
+                    <div class="d-flex justify-content-between">
+                        <span class="fw-bold text-dark">Total Amount Due</span>
+                        <span class="fw-bold text-primary">₹{{ booking.total_price }}</span>
+                    </div>
+                </div>
+
+                <!-- Payment Status Audit -->
+                <h6 class="fw-bold mb-3 small tracking-wider text-uppercase text-muted" style="font-size: 0.72rem;">Transaction Log</h6>
+                <div class="d-flex flex-column gap-3 small">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">Payment Status:</span>
+                        {% if has_payment %}
+                            <span class="badge badge-{{ payment.payment_status }} px-2.5 py-1">{{ payment.get_payment_status_display }}</span>
+                        {% else %}
+                            <span class="badge bg-light text-secondary border px-2.5 py-1">Unpaid / No record</span>
+                        {% endif %}
+                    </div>
+                    {% if has_payment %}
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Payment Method:</span>
+                            <span class="fw-semibold text-dark">{{ payment.get_payment_method_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Payment Date:</span>
+                            <span class="fw-semibold text-dark">{{ payment.payment_date|date:"M d, Y @ g:i A" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Paid Amount:</span>
+                            <span class="fw-bold text-success">₹{{ payment.amount }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Review / Ratings -->
+            {% if reviews %}
+                <div class="card shadow-sm border-0 p-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                    <h5 class="fw-bold mb-4 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                        <i data-lucide="star" class="me-2 text-primary" style="width:20px;height:20px;"></i>
+                        Customer Rating &amp; Review
+                    </h5>
+
+                    {% for r in reviews %}
+                        <div class="border rounded p-3 mb-2 bg-light">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="rating-stars fw-semibold text-warning" style="font-size: 0.95rem;">
+                                    {% for i in "12345"|make_list %}
+                                        {% if forloop.counter <= r.rating %}
+                                            ★
+                                        {% else %}
+                                            <span class="empty">☆</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ms-1 text-dark small">({{ r.rating }} / 5)</span>
+                                </span>
+                                <small class="text-muted" style="font-size:0.75rem;">{{ r.review_date|date:"M d, Y" }}</small>
+                            </div>
+                            <p class="text-muted mb-0 small" style="line-height: 1.5; font-style: italic;">
+                                "{{ r.comment|default:"No comment left by the customer." }}"
+                            </p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Service details, Customer Profile, Provider Profile -->
+        <div class="col-lg-7">
+            <!-- Service Booked Card -->
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <h5 class="fw-bold mb-3 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                    <i data-lucide="tag" class="me-2 text-primary" style="width:20px;height:20px;"></i>
+                    Service Booked
+                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 fw-bold text-dark fs-5">{{ booking.service.service_name }}</h6>
+                    <span class="category-badge">{{ booking.service.category|title }}</span>
+                </div>
+                <p class="text-secondary small mb-3">{{ booking.service.description }}</p>
+                <div class="border-top pt-2.5 d-flex flex-wrap gap-4 small text-muted">
+                    <div>
+                        <span class="d-block" style="font-size: 0.72rem;">HOURLY RATE</span>
+                        <strong class="text-dark">₹{{ booking.service.price }} / hr</strong>
+                    </div>
+                    <div>
+                        <span class="d-block" style="font-size: 0.72rem;">BOOKING DATE</span>
+                        <strong class="text-dark">{{ booking.booking_date }}</strong>
+                    </div>
+                    <div>
+                        <span class="d-block" style="font-size: 0.72rem;">TIME SLOT</span>
+                        <strong class="text-dark">
+                            {% if booking.time_slot == 'custom' %}
+                                {{ booking.custom_start_time|time:"h:i A" }} - {{ booking.custom_end_time|time:"h:i A" }} (Custom)
+                            {% else %}
+                                {{ booking.get_time_slot_display }}
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Profile Card -->
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                        <i data-lucide="user" class="me-2 text-primary" style="width:20px;height:20px;"></i>
+                        Customer Profile
+                    </h5>
+                    <a href="{% url 'admin_user_detail' booking.user.id %}" class="btn btn-sm btn-outline-primary py-1 px-2.5" style="font-size: 0.78rem;">
+                        View Full Profile
+                    </a>
+                </div>
+
+                <div class="row g-3 small">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">FULL NAME</small>
+                        <strong class="text-dark">{{ booking.user.get_full_name|default:booking.user.username }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">USERNAME</small>
+                        <strong class="text-dark">@{{ booking.user.username }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">EMAIL ADDRESS</small>
+                        <span class="text-secondary fw-semibold">{{ booking.user.email|default:"Not provided" }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">PHONE NUMBER</small>
+                        {% if booking.user.phone %}
+                            <a href="tel:{{ booking.user.phone }}" class="text-primary text-decoration-none fw-bold"><i data-lucide="phone" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-1px;"></i>{{ booking.user.phone }}</a>
+                        {% else %}
+                            <span class="text-secondary">Not provided</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">STREET ADDRESS</small>
+                        <span class="text-dark fw-medium">{{ booking.user.address|default:"Not provided" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Provider Profile Card -->
+            <div class="card shadow-sm border-0 p-4 mb-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.05rem; color: var(--primary-text);">
+                        <i data-lucide="briefcase" class="me-2 text-primary" style="width:20px;height:20px;"></i>
+                        Service Provider Details
+                    </h5>
+                    <a href="{% url 'admin_user_detail' booking.provider.user.id %}" class="btn btn-sm btn-outline-primary py-1 px-2.5" style="font-size: 0.78rem;">
+                        View Full Profile
+                    </a>
+                </div>
+
+                <div class="row g-3 small">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">BUSINESS/FIRST NAME</small>
+                        <strong class="text-dark">{{ booking.provider.business_name|default:booking.provider.user.get_full_name|default:booking.provider.user.username }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">SPECIALIZATION / SKILL</small>
+                        <strong class="text-dark">{{ booking.provider.skill|default:"Not specified" }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">EXPERIENCE WORK LEVEL</small>
+                        <span class="text-secondary fw-semibold">{{ booking.provider.experience }} year{{ booking.provider.experience|pluralize }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">VERIFICATION STATUS</small>
+                        {% if booking.provider.is_verified %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle py-0.5 px-2">Verified</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle py-0.5 px-2">Unverified</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">EMAIL ADDRESS</small>
+                        <span class="text-secondary fw-semibold">{{ booking.provider.user.email|default:"Not provided" }}</span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">PROVIDER PHONE</small>
+                        {% if booking.provider.user.phone %}
+                            <a href="tel:{{ booking.provider.user.phone }}" class="text-primary text-decoration-none fw-bold"><i data-lucide="phone" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-1px;"></i>{{ booking.provider.user.phone }}</a>
+                        {% else %}
+                            <span class="text-secondary">Not provided</span>
+                        {% endif %}
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">OPERATIONAL CITY / LOCATION</small>
+                        <span class="text-dark fw-medium">{{ booking.provider.location|default:"Not specified" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Logs History Audit Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 p-4" style="border-radius: var(--radius-lg); background-color: var(--white);">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center" style="font-family:'Poppins'; font-size: 1.1rem; color: var(--primary-text);">
+                        <i data-lucide="message-square" class="me-2 text-primary" style="width:22px;height:22px;"></i>
+                        Secure Booking Chat Log (Audit Trail)
+                    </h5>
+                    <span class="badge rounded-pill bg-light text-secondary border px-3 py-1.5 small">
+                        Total Messages: {{ chat_messages|length }}
+                    </span>
+                </div>
+
+                <!-- Chat Feed Scroll Box -->
+                <div id="chat-audit-container" class="p-3 border rounded overflow-y-auto" style="height: 350px; background-color: #f8f9fa; scrollbar-width: thin;">
+                    {% if chat_messages %}
+                        {% for msg in chat_messages %}
+                            <div class="d-flex mb-3 {% if msg.sender.role == 'admin' %}justify-content-center{% elif msg.sender == booking.user %}justify-content-start{% else %}justify-content-end{% endif %}">
+                                <div class="max-width-75">
+                                    <small class="text-muted d-block mb-1 ps-1 {% if msg.sender.role == 'admin' %}text-center{% elif msg.sender != booking.user %}text-end pe-1{% endif %}" style="font-size: 0.74rem; font-weight: 600;">
+                                        {% if msg.sender.role == 'admin' %}
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5"><i data-lucide="shield" class="me-1 d-inline-block" style="width:10px;height:10px;vertical-align:-1px;"></i>Admin (Mediator)</span>
+                                        {% elif msg.sender == booking.user %}
+                                            Customer: {{ msg.sender.get_full_name|default:msg.sender.username }}
+                                        {% else %}
+                                            Provider: {{ msg.sender.get_full_name|default:msg.sender.username }}
+                                        {% endif %}
+                                    </small>
+                                    
+                                    <div class="py-2 px-3 rounded shadow-sm {% if msg.sender.role == 'admin' %}bg-danger-subtle border border-danger text-danger-emphasis{% elif msg.sender == booking.user %}bg-white border text-dark{% else %}bg-primary text-white{% endif %}"
+                                         style="font-size: 0.9rem; border-radius: 12px !important; line-height: 1.45; word-break: break-word;">
+                                        {{ msg.message }}
+                                    </div>
+                                    <small class="text-muted d-block mt-0.5 px-1 {% if msg.sender.role == 'admin' %}text-center{% elif msg.sender != booking.user %}text-end{% endif %}" style="font-size: 0.68rem;">{{ msg.created_at|date:"M d @ g:i A" }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3 d-inline-flex p-3 rounded-circle bg-white text-muted shadow-sm">
+                                <i data-lucide="message-square" style="width: 28px; height: 28px;"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">No Messages Exchanged Yet</h6>
+                            <p class="text-muted small mb-0">The customer and service provider have not yet communicated via the chat portal.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-3 text-end text-muted small">
+                    <i data-lucide="lock" class="d-inline-block me-1" style="width:12px;height:12px;vertical-align:-1px;"></i>Chat logs are encrypted, archived, and secured for customer/provider safety.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .max-width-75 {
+        max-width: 75%;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('chat-audit-container');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    });
+</script>
+{% endblock %}

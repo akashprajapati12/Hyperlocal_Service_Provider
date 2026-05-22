@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Checkout — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card p-4">
+                <h4 class="mb-4 d-flex align-items-center" style="font-family:'Poppins';"><i data-lucide="credit-card" class="me-2" style="width:20px;height:20px;"></i>Checkout</h4>
+                <div class="p-3 mb-4" style="background-color:var(--secondary-bg); border:1px solid var(--border-color); border-radius:var(--radius);">
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Service</span><strong class="small">{{ booking.service.service_name }}</strong></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Provider</span><span class="small">{{ booking.provider.user.get_full_name|default:booking.provider.user.username }}</span></div>
+                    <div class="d-flex justify-content-between mb-2"><span class="text-muted small">Date</span><span class="small">{{ booking.booking_date }}</span></div>
+                    <hr class="my-2" style="border-color:var(--border-color);">
+                    {% if booking.extra_hours > 0.00 %}
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Base Service Charge</span><span class="small">₹{{ booking.service.price }}</span></div>
+                    <div class="d-flex justify-content-between mb-1"><span class="text-muted small">Overtime Work Charge ({% if booking.extra_hours_part > 0 %}{{ booking.extra_hours_part }}h {% endif %}{% if booking.extra_minutes_part > 0 %}{{ booking.extra_minutes_part }}m{% endif %})</span><span class="small">+₹{{ booking.extra_charges }}</span></div>
+                    <hr class="my-1" style="border-color:var(--border-color);">
+                    {% endif %}
+                    <div class="d-flex justify-content-between align-items-center"><span class="fw-bold small">Total Amount</span><span class="price-tag">₹{{ booking.total_price }}</span></div>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <label class="form-label mb-3">Payment Method</label>
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <label class="payment-method-card d-flex align-items-center gap-3">
+                            <input type="radio" name="payment_method" value="cash" checked class="form-check-input">
+                            <i data-lucide="wallet" style="width:24px;height:24px;stroke-width:1.5;"></i>
+                            <div><strong style="font-size:.85rem;">Cash on Service</strong><br><small class="text-muted" style="font-size:.75rem;">Pay when service is completed</small></div>
+                        </label>
+                        <label class="payment-method-card d-flex align-items-center gap-3">
+                            <input type="radio" name="payment_method" value="online" class="form-check-input">
+                            <i data-lucide="smartphone" style="width:24px;height:24px;stroke-width:1.5;"></i>
+                            <div><strong style="font-size:.85rem;">Online Payment</strong><br><small class="text-muted" style="font-size:.75rem;">Pay securely online</small></div>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Confirm Payment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

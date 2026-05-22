@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}HyperLocal — Premium Local Services On Demand{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <h1 class="mb-3">Your everyday services, <br><span class="accent-outline">simplified.</span></h1>
+                <p class="mb-4">Book vetted local professionals for repair, installation, cleaning, and tutoring. Straightforward hourly pricing, transparent reviews, and zero hassle.</p>
+                
+                <!-- Unique Search Box -->
+                <form method="GET" action="{% url 'service_list' %}" class="d-flex gap-2 mb-4 p-1 bg-white border border-dark rounded-2" style="max-width:540px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                    <div class="d-flex align-items-center px-3 flex-grow-1">
+                        <i data-lucide="search" class="text-muted me-2" style="width:18px;height:18px;"></i>
+                        <input type="text" name="search" class="form-control border-0 p-0 fs-6 shadow-none" placeholder="What service do you need?" style="outline:none; background:transparent;">
+                    </div>
+                    <button type="submit" class="btn btn-primary px-4 py-2 text-nowrap">Find Services</button>
+                </form>
+
+                <div class="d-flex flex-wrap gap-2 align-items-center mt-3">
+                    <span class="text-muted small me-2">Popular:</span>
+                    <a href="{% url 'service_list' %}?category=plumbing" class="hero-chip text-decoration-none"><i data-lucide="droplet" style="width:14px;height:14px;"></i> Plumbing</a>
+                    <a href="{% url 'service_list' %}?category=electrical" class="hero-chip text-decoration-none"><i data-lucide="zap" style="width:14px;height:14px;"></i> Electrical</a>
+                    <a href="{% url 'service_list' %}?category=cleaning" class="hero-chip text-decoration-none"><i data-lucide="sparkles" style="width:14px;height:14px;"></i> Cleaning</a>
+                </div>
+            </div>
+            
+            <div class="col-lg-5 d-none d-lg-block">
+                <!-- Spacer to allow the hero section's background illustration to show through on desktop -->
+                <div class="hero-background-spacer" style="height: 380px;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="mb-4 text-center">
+            <h2>Popular Categories</h2>
+            <p class="text-muted">Find specialized assistance for any task</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'service_list' %}?category=plumbing" class="text-decoration-none">
+                    <div class="category-card">
+                        <div class="category-icon mx-auto"><i data-lucide="droplet"></i></div>
+                        <h6>Plumbing</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'service_list' %}?category=electrical" class="text-decoration-none">
+                    <div class="category-card">
+                        <div class="category-icon mx-auto"><i data-lucide="zap"></i></div>
+                        <h6>Electrical</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'service_list' %}?category=cleaning" class="text-decoration-none">
+                    <div class="category-card">
+                        <div class="category-icon mx-auto"><i data-lucide="sparkles"></i></div>
+                        <h6>Cleaning</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'service_list' %}?category=tutoring" class="text-decoration-none">
+                    <div class="category-card">
+                        <div class="category-icon mx-auto"><i data-lucide="book-open"></i></div>
+                        <h6>Tutoring</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'service_list' %}?category=beauty" class="text-decoration-none">
+                    <div class="category-card">
+                        <div class="category-icon mx-auto"><i data-lucide="scissors"></i></div>
+                        <h6>Beauty</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'service_list' %}?category=other" class="text-decoration-none">
+                    <div class="category-card">
+                        <div class="category-icon mx-auto"><i data-lucide="grid"></i></div>
+                        <h6>Other</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if user.is_authenticated %}
+<!-- Customer Dashboard Section -->
+<section class="py-5" style="background-color: var(--secondary-bg); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="mb-4">
+            <h4 style="font-family:'Poppins';">Your Bookings Dashboard</h4>
+            <p class="text-muted">Here's an overview of your bookings</p>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row gap-3 mb-4 align-items-stretch">
+            <div class="stat-card flex-fill">
+                <div class="stat-icon"><i data-lucide="calendar"></i></div>
+                <div>
+                    <div class="stat-value">{{ total_bookings }}</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+            </div>
+            <div class="stat-card flex-fill">
+                <div class="stat-icon"><i data-lucide="hourglass"></i></div>
+                <div>
+                    <div class="stat-value">{{ pending_bookings }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+            <div class="stat-card flex-fill">
+                <div class="stat-icon"><i data-lucide="check-circle"></i></div>
+                <div>
+                    <div class="stat-value">{{ completed_bookings }}</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <div class="stat-card flex-fill">
+                <div class="stat-icon text-danger"><i data-lucide="x-circle"></i></div>
+                <div>
+                    <div class="stat-value">{{ cancelled_bookings }}</div>
+                    <div class="stat-label">Cancelled</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 bg-white border border-dark rounded-2" style="box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <h5 class="mb-3">Recent Bookings</h5>
+            {% if bookings %}
+            <div class="table-responsive recent-bookings-scroll">
+                <table class="table table-modern mb-0">
+                    <thead><tr><th>#</th><th>Service</th><th>Provider</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for b in bookings %}
+                    <tr>
+                        <td>{{ b.id }}</td>
+                        <td>{{ b.service.service_name }}</td>
+                        <td>{{ b.provider.user.get_full_name|default:b.provider.user.username }}</td>
+                        <td>{{ b.booking_date }}</td>
+                        <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
+                        <td><a href="{% url 'booking_detail' b.id %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i data-lucide="inbox" class="mx-auto mb-2 d-block" style="width:40px;height:40px;stroke-width:1.5;"></i>
+                <p class="mt-2">No bookings yet. <a href="{% url 'service_list' %}" class="text-decoration-underline text-dark fw-semibold">Browse services</a> to get started!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% else %}
+<!-- How It Works -->
+<section class="py-5" style="background-color: var(--secondary-bg); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+        <div class="mb-5 text-center">
+            <h2>How It Works</h2>
+            <p class="text-muted">Simple booking, professional delivery</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="step-number">1</div>
+                <h5 class="mt-3">Choose Service</h5>
+                <p class="text-muted small px-lg-4">Browse verified local specialists based on category, skills, location, and real customer ratings.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="step-number">2</div>
+                <h5 class="mt-3">Book Instantly</h5>
+                <p class="text-muted small px-lg-4">Select a convenient date, complete your checkout securely, and track your booking status directly.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="step-number">3</div>
+                <h5 class="mt-3">Get Quality Service</h5>
+                <p class="text-muted small px-lg-4">Your professional arrives on schedule. Pay securely and share your feedback once the job is complete.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if not user.is_authenticated %}
+<!-- CTA Section -->
+<section class="py-5 bg-white">
+    <div class="container text-center">
+        <h3 class="mb-3">Ready to find trusted help?</h3>
+        <p class="mb-4 text-muted mx-auto" style="max-width: 500px;">Sign up as a customer to book quality local services, or register as a provider to start offering your professional services.</p>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Sign Up as Customer</a>
+            <a href="{% url 'provider_register' %}" class="btn btn-outline-primary btn-lg">Join as Provider</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

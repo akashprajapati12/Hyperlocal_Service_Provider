@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Leave Review — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card p-4">
+                <h4 class="mb-1 d-flex align-items-center" style="font-family:'Poppins'"><i data-lucide="star" class="me-2" style="width:20px;height:20px;"></i>Leave a Review</h4>
+                <p class="text-muted mb-4 small">Rate your experience with <strong>{{ booking.service.service_name }}</strong></p>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label">Your Rating</label>
+                        <div class="star-rating d-flex gap-1">
+                            <input type="radio" id="star5" name="star" value="5"><label for="star5"><i data-lucide="star" style="width:20px;height:20px;stroke-width:1.5;"></i></label>
+                            <input type="radio" id="star4" name="star" value="4"><label for="star4"><i data-lucide="star" style="width:20px;height:20px;stroke-width:1.5;"></i></label>
+                            <input type="radio" id="star3" name="star" value="3" checked><label for="star3"><i data-lucide="star" style="width:20px;height:20px;stroke-width:1.5;"></i></label>
+                            <input type="radio" id="star2" name="star" value="2"><label for="star2"><i data-lucide="star" style="width:20px;height:20px;stroke-width:1.5;"></i></label>
+                            <input type="radio" id="star1" name="star" value="1"><label for="star1"><i data-lucide="star" style="width:20px;height:20px;stroke-width:1.5;"></i></label>
+                        </div>
+                        {{ form.rating }}
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Your Review</label>
+                        {{ form.comment }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Submit Review</button>
+                    <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline-primary w-100 mt-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    const ratingInput = document.getElementById('rating-value');
+    if(ratingInput) ratingInput.value = 3;
+    
+    const stars = document.querySelectorAll('.star-rating label');
+    const inputs = document.querySelectorAll('.star-rating input');
+    
+    function highlightStars(val) {
+        inputs.forEach((input, index) => {
+            const starIcon = input.nextElementSibling.querySelector('svg');
+            if (starIcon) {
+                if (parseInt(input.value) <= val) {
+                    starIcon.style.fill = 'currentColor';
+                } else {
+                    starIcon.style.fill = 'none';
+                }
+            }
+        });
+    }
+
+    inputs.forEach(s => {
+        s.addEventListener('change', function(){ 
+            ratingInput.value = this.value; 
+            highlightStars(parseInt(this.value));
+        });
+    });
+
+    // Initialize stars highlighting
+    highlightStars(3);
+});
+</script>
+{% endblock %}
