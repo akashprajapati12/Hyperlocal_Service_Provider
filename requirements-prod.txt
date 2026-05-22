@@ -1,5 +1,1 @@
-# Production-only dependencies (installed during Vercel build or production deploy)
-psycopg2-binary==2.9.7
-cloudinary==1.35.0
-django-cloudinary-storage==0.3.0
-urllib3==2.7.0
+# Deprecated. All production packages are now consolidated and upgraded inside the main requirements.txt.
