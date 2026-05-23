@@ -19,14 +19,29 @@ fi
 echo "Using $PY_CMD to upgrade pip"
 eval "$PY_CMD -m pip install --upgrade pip"
 
-# Install requirements. On some platforms binary-only installs fail; allow source builds.
-echo "Installing requirements.txt"
-eval "$PY_CMD -m pip install -r requirements.txt"
+# Helper: install requirements and retry with --break-system-packages on failure
+install_requirements() {
+	REQ_FILE="$1"
+	if [ ! -f "$REQ_FILE" ]; then
+		return 0
+	fi
+	echo "Installing $REQ_FILE"
+	set +e
+	eval "$PY_CMD -m pip install -r \"$REQ_FILE\""
+	RC=$?
+	set -e
+	if [ $RC -ne 0 ]; then
+		echo "pip install failed for $REQ_FILE; retrying with --break-system-packages"
+		eval "$PY_CMD -m pip install --break-system-packages -r \"$REQ_FILE\""
+	fi
+}
+
+# Install requirements (with fallback to break-system-packages)
+install_requirements requirements.txt
 
 # If production-only requirements exist, install them
 if [ -f requirements-prod.txt ]; then
-	echo "Installing requirements-prod.txt"
-	eval "$PY_CMD -m pip install -r requirements-prod.txt"
+	install_requirements requirements-prod.txt
 fi
 
 echo "Running migrations"
