@@ -1,1 +1,0 @@
-# Deprecated. All production packages are now consolidated and upgraded inside the main requirements.txt.
