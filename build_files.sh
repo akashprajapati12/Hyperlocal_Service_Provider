@@ -2,11 +2,11 @@
 
 echo "BUILD START"
 
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
 
-python manage.py collectstatic --noinput
-python manage.py migrate
+python3 manage.py collectstatic --noinput
+python3 manage.py migrate
 echo "BUILD END"

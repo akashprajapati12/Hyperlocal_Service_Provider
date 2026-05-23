@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -14,17 +15,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    'SECRET_KEY',
-    'django-insecure-_9n2mnf@tc7a$z#5+0$#68ocm1mdg!ddy5w*wbr_c)w)yhx_5*'
-)
-
-SECURE_SSL_REDIRECT = False
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-_9n2mnf@tc7a$z#5+0$#68ocm1mdg!ddy5w*wbr_c)w)yhx_5*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+if not DEBUG and os.environ.get('SECRET_KEY') is None:
+    raise ImproperlyConfigured('SECRET_KEY must be set in the environment for production.')
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+def env_list(var_name, default=None):
+    value = os.environ.get(var_name, default)
+    if not value:
+        return []
+    return [item.strip() for item in value.split(',') if item.strip()]
+
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', '*')
 VERCEL_URL = os.environ.get('VERCEL_URL')
 if VERCEL_URL:
     ALLOWED_HOSTS.append(VERCEL_URL)
@@ -181,14 +185,14 @@ LOGOUT_REDIRECT_URL = '/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security settings for production
-CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
 if VERCEL_URL:
     # Vercel provides the deployment URL like my-app.vercel.app
     CSRF_TRUSTED_ORIGINS.append(f"https://{VERCEL_URL}")
 CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
 
 # CORS
-CORS_ALLOWED_ORIGINS = [o for o in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if o]
+CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS')
 if VERCEL_URL:
     CORS_ALLOWED_ORIGINS.append(f"https://{VERCEL_URL}")
 
