@@ -19,6 +19,8 @@ SECRET_KEY = os.environ.get(
     'django-insecure-_9n2mnf@tc7a$z#5+0$#68ocm1mdg!ddy5w*wbr_c)w)yhx_5*'
 )
 
+SECURE_SSL_REDIRECT = False
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
