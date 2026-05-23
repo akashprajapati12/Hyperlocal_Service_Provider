@@ -92,10 +92,16 @@ WSGI_APPLICATION = 'Hyperlocal_Service_Provider.wsgi.application'
 
 
 # Database
+# If running on Vercel and using SQLite, put it in /tmp because the project root is read-only
+if os.environ.get('VERCEL') and not os.environ.get('DATABASE_URL'):
+    sqlite_path = '/tmp/db.sqlite3'
+else:
+    sqlite_path = BASE_DIR / 'db.sqlite3'
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
+        default=f"sqlite:///{sqlite_path}",
+        conn_max_age=0 if os.environ.get('VERCEL') else 600,
     )
 }
 
@@ -123,14 +129,24 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
 # Storage configuration (Django 4.2+ compatible, mandatory for Django 6.0+)
-STORAGES = {
-    "default": {
+if DEBUG:
+    STORAGES = {
+        "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
     }
-}
+else:
+    STORAGES = {
+        "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+        },
+    }
 
 # Media files
 MEDIA_URL = '/media/'
