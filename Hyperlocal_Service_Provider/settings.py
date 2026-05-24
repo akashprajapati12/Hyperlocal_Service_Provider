@@ -8,19 +8,16 @@ import dj_database_url
 from dotenv import load_dotenv
 from django.core.exceptions import ImproperlyConfigured
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env for local and build-time environment variables
 load_dotenv(BASE_DIR / '.env')
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-_9n2mnf@tc7a$z#5+0$#68ocm1mdg!ddy5w*wbr_c)w)yhx_5*'
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-temp-key'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
 if not DEBUG and os.environ.get('SECRET_KEY') is None:
-    raise ImproperlyConfigured('SECRET_KEY must be set in the environment for production.')
+    raise ImproperlyConfigured('SECRET_KEY must be set in production.')
 
 def env_list(var_name, default=None):
     value = os.environ.get(var_name, default)
@@ -28,19 +25,12 @@ def env_list(var_name, default=None):
         return []
     return [item.strip() for item in value.split(',') if item.strip()]
 
-ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', '*')
+ALLOWED_HOSTS = ['*']
+
 VERCEL_URL = os.environ.get('VERCEL_URL')
 if VERCEL_URL:
     ALLOWED_HOSTS.append(VERCEL_URL)
     ALLOWED_HOSTS.append('.vercel.app')
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    # Project apps
+
     'users',
     'providers',
     'services',
@@ -58,8 +48,11 @@ INSTALLED_APPS = [
     'payments',
     'reviews',
     'admin_panel',
-    'whitenoise.runserver_nostatic',
+
     'corsheaders',
+    'whitenoise.runserver_nostatic',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +68,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'Hyperlocal_Service_Provider.urls'
+
 
 TEMPLATES = [
     {
@@ -95,118 +89,93 @@ TEMPLATES = [
 WSGI_APPLICATION = 'Hyperlocal_Service_Provider.wsgi.application'
 
 
-# Database
-# If running on Vercel and using SQLite, put it in /tmp because the project root is read-only
 if os.environ.get('VERCEL') and not os.environ.get('DATABASE_URL'):
     sqlite_path = '/tmp/db.sqlite3'
 else:
     sqlite_path = BASE_DIR / 'db.sqlite3'
 
+
 DATABASES = {
     'default': dj_database_url.config(
         default=f"sqlite:///{sqlite_path}",
-        conn_max_age=0 if os.environ.get('VERCEL') else 600,
+        conn_max_age=600,
     )
 }
 
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
-
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
-# Storage configuration (Django 4.2+ compatible, mandatory for Django 6.0+)
-if DEBUG:
-    STORAGES = {
-        "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-        },
-    }
-else:
-    STORAGES = {
-        "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-        },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
-        },
-    }
-
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Cloudinary support: if CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME set, use Cloudinary for media
-if os.environ.get('CLOUDINARY_URL') or os.environ.get('CLOUDINARY_CLOUD_NAME'):
-    # add apps only when cloudinary is configured
-    INSTALLED_APPS += [
-        'cloudinary',
-        'cloudinary_storage',
-    ]
-    STORAGES["default"] = {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    }
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-        'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-        'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-    }
 
-
-# Custom user model
 AUTH_USER_MODEL = 'users.UserProfile'
 
-# Login / Logout redirects
 LOGIN_URL = '/users/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Default primary key field type
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Security settings for production
-CSRF_TRUSTED_ORIGINS = env_list('CSRF_TRUSTED_ORIGINS')
-if VERCEL_URL:
-    # Vercel provides the deployment URL like my-app.vercel.app
-    CSRF_TRUSTED_ORIGINS.append(f"https://{VERCEL_URL}")
-CSRF_TRUSTED_ORIGINS.append("https://*.vercel.app")
 
-# CORS
-CORS_ALLOWED_ORIGINS = env_list('CORS_ALLOWED_ORIGINS')
-if VERCEL_URL:
-    CORS_ALLOWED_ORIGINS.append(f"https://{VERCEL_URL}")
+CORS_ALLOW_ALL_ORIGINS = True
 
-# Secure defaults when not DEBUG
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+]
+
+if VERCEL_URL:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{VERCEL_URL}')
+
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', 3600))
+    SECURE_HSTS_SECONDS = 3600
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
 
-# Messages
+
 from django.contrib.messages import constants as message_constants
 MESSAGE_TAGS = {
     message_constants.DEBUG: 'secondary',
