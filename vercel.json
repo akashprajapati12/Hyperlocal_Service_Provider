@@ -3,18 +3,13 @@
   "builds": [
     {
       "src": "Hyperlocal_Service_Provider/wsgi.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "python3.12"
-      }
+      "use": "@vercel/python"
     }
   ],
-  "buildCommand": "python3 manage.py collectstatic --noinput",
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "staticfiles/$1"
+      "dest": "/static/$1"
     },
     {
       "src": "/(.*)",
