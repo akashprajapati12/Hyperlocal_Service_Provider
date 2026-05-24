@@ -64,8 +64,6 @@ class UnifiedRegistrationForm(UserCreationForm):
                 self.add_error('skill', 'Skill is required for providers.')
             if not cleaned_data.get('location'):
                 self.add_error('location', 'Location is required for providers.')
-            if not self.files.get('document'):
-                self.add_error('document', 'Document upload is required for providers.')
         return cleaned_data
 
     def save(self, commit=True):
@@ -81,7 +79,7 @@ class UnifiedRegistrationForm(UserCreationForm):
                     skill=self.cleaned_data['skill'],
                     location=self.cleaned_data['location'],
                     bio=self.cleaned_data.get('bio', ''),
-                    document=self.files.get('document'),
+                    document=self.files.get('document') if self.files.get('document') else None,
                 )
         return user
 

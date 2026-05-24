@@ -44,6 +44,7 @@ class ProviderRegistrationForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = 'provider'
+        user.phone = self.cleaned_data.get('phone', '')
         if commit:
             user.save()
             ServiceProvider.objects.create(
