@@ -14,7 +14,7 @@ load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get('SECRET_KEY') or 'django-insecure-temp-key'
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 if not DEBUG and os.environ.get('SECRET_KEY') is None:
     raise ImproperlyConfigured('SECRET_KEY must be set in production.')
@@ -178,3 +178,5 @@ MESSAGE_TAGS = {
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
