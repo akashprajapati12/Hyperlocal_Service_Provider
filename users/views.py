@@ -81,13 +81,8 @@ def login_view(request):
                 else:
                     request.session.set_expiry(0)        # Browser close
                 messages.success(request, f'Welcome back, {user.first_name or user.username}!')
-                # Role-based redirect
-                if user.role == 'admin':
-                    return redirect('admin_dashboard')
-                elif user.role == 'provider':
-                    return redirect('provider_dashboard')
-                else:
-                    return redirect('customer_dashboard')
+                # Redirect to home page after login
+                return redirect('home')
             else:
                 messages.error(request, 'Invalid username or password.')
     else:
@@ -172,6 +167,11 @@ def feedback_view(request):
         messages.success(request, 'Thank you for your valuable feedback!')
         return redirect('feedback')
     return render(request, 'feedback.html')
+
+
+def developers_view(request):
+    """Our Developers page."""
+    return render(request, 'developers.html')
 
 
 @login_required

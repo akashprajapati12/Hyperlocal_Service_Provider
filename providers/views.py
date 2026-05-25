@@ -18,7 +18,7 @@ def provider_register_view(request):
         return redirect('dashboard')
 
     if request.method == 'POST':
-        form = ProviderRegistrationForm(request.POST)
+        form = ProviderRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
             login(request, user)
@@ -77,13 +77,24 @@ def add_service_view(request):
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
+            # Update provider details
+            provider.skill = form.cleaned_data['skill']
+            provider.location = form.cleaned_data['location']
+            provider.bio = form.cleaned_data['bio']
+            provider.save()
+
+            # Save service
             service = form.save(commit=False)
             service.provider = provider
             service.save()
             messages.success(request, 'Service added successfully!')
             return redirect('provider_dashboard')
     else:
-        form = ServiceForm()
+        form = ServiceForm(initial={
+            'skill': provider.skill,
+            'location': provider.location,
+            'bio': provider.bio,
+        })
 
     return render(request, 'providers/add_service.html', {'form': form})
 

@@ -11,7 +11,7 @@
         </div>
         <h2>Join as Provider</h2>
         <p class="subtitle">Offer your services and start earning</p>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="row g-3">
                 <div class="col-6">
@@ -31,14 +31,12 @@
                 <div class="col-md-6">
                     <label class="form-label">Phone</label>{{ form.phone }}
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Primary Skill</label>{{ form.skill }}
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Location</label>{{ form.location }}
-                </div>
                 <div class="col-12">
-                    <label class="form-label">Bio</label>{{ form.bio }}
+                    <label class="form-label">Verification Document</label>{{ form.document }}
+                    <small class="text-muted d-block mt-2 d-flex align-items-start"><i data-lucide="info"
+                            class="me-2 mt-1" style="width:14px;height:14px;flex-shrink:0;"></i>Upload ID proof or
+                        skill certificate (PDF, JPG, PNG) for verification.</small>
+                    {% if form.document.errors %}<small class="text-danger d-block mt-1">{{ form.document.errors.0 }}</small>{% endif %}
                 </div>
                 <div class="col-6">
                     <label class="form-label">Password</label>{{ form.password1 }}

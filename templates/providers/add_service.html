@@ -8,11 +8,57 @@
     <div class="card p-4" style="max-width:640px">
         <form method="POST">
             {% csrf_token %}
-            <div class="mb-3"><label class="form-label">Service Name</label>{{ form.service_name }}</div>
-            <div class="mb-3"><label class="form-label">Category</label>{{ form.category }}</div>
-            <div class="mb-3"><label class="form-label">Description</label>{{ form.description }}</div>
-            <div class="mb-4"><label class="form-label">Price (₹)</label>{{ form.price }}</div>
-            <button type="submit" class="btn btn-primary">Add Service</button>
+            
+            <h6 class="mb-3 text-muted" style="font-family:'Poppins';font-weight:600;letter-spacing:0.03em;">SERVICE DETAILS</h6>
+            <div class="mb-3">
+                <label class="form-label">Service Name</label>
+                {{ form.service_name }}
+                {% if form.service_name.errors %}<small class="text-danger d-block mt-1">{{ form.service_name.errors.0 }}</small>{% endif %}
+            </div>
+            
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Category</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}<small class="text-danger d-block mt-1">{{ form.category.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Price (₹)</label>
+                    {{ form.price }}
+                    {% if form.price.errors %}<small class="text-danger d-block mt-1">{{ form.price.errors.0 }}</small>{% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="form-label">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}<small class="text-danger d-block mt-1">{{ form.description.errors.0 }}</small>{% endif %}
+            </div>
+
+            <hr class="my-4">
+
+            <h6 class="mb-3 text-muted" style="font-family:'Poppins';font-weight:600;letter-spacing:0.03em;">PROVIDER PROFILE DETAILS</h6>
+            
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Primary Skill <span class="text-danger">*</span></label>
+                    {{ form.skill }}
+                    {% if form.skill.errors %}<small class="text-danger d-block mt-1">{{ form.skill.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Service Location <span class="text-danger">*</span></label>
+                    {{ form.location }}
+                    {% if form.location.errors %}<small class="text-danger d-block mt-1">{{ form.location.errors.0 }}</small>{% endif %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Provider Bio</label>
+                {{ form.bio }}
+                {% if form.bio.errors %}<small class="text-danger d-block mt-1">{{ form.bio.errors.0 }}</small>{% endif %}
+            </div>
+            
+            <button type="submit" class="btn btn-primary px-4">Add Service</button>
             <a href="{% url 'provider_dashboard' %}" class="btn btn-outline-primary ms-2">Cancel</a>
         </form>
     </div>

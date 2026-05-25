@@ -19,15 +19,9 @@ class ProviderRegistrationForm(UserCreationForm):
     phone = forms.CharField(max_length=15, widget=forms.TextInput(attrs={
         'class': 'form-control', 'placeholder': 'Phone Number'
     }))
-    skill = forms.CharField(max_length=200, widget=forms.TextInput(attrs={
-        'class': 'form-control', 'placeholder': 'Primary Skill (e.g., Plumbing, Electrical)'
-    }))
-    location = forms.CharField(max_length=200, widget=forms.TextInput(attrs={
-        'class': 'form-control', 'placeholder': 'Service Location'
-    }))
-    bio = forms.CharField(widget=forms.Textarea(attrs={
-        'class': 'form-control', 'placeholder': 'Tell us about yourself and your experience', 'rows': 3
-    }), required=False)
+    document = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={
+        'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'
+    }), help_text='Upload ID proof or skill certificate (PDF, JPG, PNG)')
 
     class Meta:
         model = UserProfile
@@ -49,9 +43,10 @@ class ProviderRegistrationForm(UserCreationForm):
             user.save()
             ServiceProvider.objects.create(
                 user=user,
-                skill=self.cleaned_data['skill'],
-                location=self.cleaned_data['location'],
-                bio=self.cleaned_data.get('bio', ''),
+                skill='',
+                location='',
+                bio='',
+                document=self.files.get('document') if self.files.get('document') else None,
             )
         return user
 

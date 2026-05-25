@@ -9,6 +9,9 @@
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-7">
+                <div class="mb-2">
+                    <span id="home-greeting-title" class="text-uppercase fw-bold text-dark" style="font-family:'Poppins'; font-size:1.15rem; letter-spacing:0.08em; color:#000000 !important;"></span>
+                </div>
                 <h1 class="mb-3">Your everyday services, <br><span class="accent-outline">simplified.</span></h1>
                 <p class="mb-4">Book vetted local professionals for repair, installation, cleaning, and tutoring. Straightforward hourly pricing, transparent reviews, and zero hassle.</p>
                 
@@ -208,4 +211,32 @@
     </div>
 </section>
 {% endif %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const homeGreetingTitle = document.getElementById('home-greeting-title');
+        if (homeGreetingTitle) {
+            const hour = new Date().getHours();
+            let greeting = "Good Evening";
+            if (hour < 12) {
+                greeting = "Good Morning";
+            } else if (hour < 17) {
+                greeting = "Good Afternoon";
+            }
+            {% if user.is_authenticated %}
+                {% if user.role == 'customer' %}
+                    homeGreetingTitle.textContent = `${greeting}, Customer {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
+                {% elif user.role == 'provider' %}
+                    homeGreetingTitle.textContent = `${greeting}, Provider {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
+                {% elif user.role == 'admin' %}
+                    homeGreetingTitle.textContent = `${greeting}, Admin {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
+                {% endif %}
+            {% else %}
+                homeGreetingTitle.textContent = `${greeting}! Welcome to HyperLocal.`;
+            {% endif %}
+        }
+    });
+</script>
+{% endblock %}
 {% endblock %}

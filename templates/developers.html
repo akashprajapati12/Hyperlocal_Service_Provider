@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Developers - HyperLocal{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Premium Styles for Developers Page */
+    .dev-header-section {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.03) 0%, rgba(168, 85, 247, 0.03) 100%);
+        border-radius: 24px;
+        padding: 40px 40px;
+        margin-bottom: 50px;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .dev-text-column {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .dev-text-column h1, 
+    .dev-text-column h4, 
+    .dev-text-column p,
+    .dev-text-column span {
+        text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95), 0 2px 8px rgba(255, 255, 255, 0.9);
+    }
+    
+    .dev-illustration-column {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .dev-illustration-container {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
+    
+    .dev-illustration-container:hover {
+        transform: translateY(-4px);
+    }
+    
+    .dev-hero-illustration {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    @media (min-width: 992px) {
+        .dev-header-section {
+            height: 380px;
+            display: flex;
+            align-items: center;
+            padding: 30px 40px;
+        }
+        
+        .dev-text-column {
+            max-width: 62%;
+            flex: 0 0 62%;
+        }
+        
+        .dev-illustration-column {
+            position: absolute !important;
+            right: 25px;
+            top: 25px;
+            bottom: 25px;
+            width: 46%;
+            height: calc(100% - 50px);
+            z-index: 1;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .dev-illustration-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        .dev-hero-illustration {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 16px;
+            mask-image: linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+        }
+    }
+    
+    @media (max-width: 991.98px) {
+        .dev-hero-illustration {
+            width: 100%;
+            margin-left: 0;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+        }
+        .dev-header-section {
+            padding: 30px 20px;
+        }
+    }
+    
+    .developer-card {
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 20px;
+        background: #ffffff;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .developer-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 8px;
+        transition: all 0.4s ease;
+    }
+    
+    .card-aarav::before {
+        background: linear-gradient(90deg, #6366f1, #4f46e5);
+    }
+    .card-nisha::before {
+        background: linear-gradient(90deg, #ec4899, #d946ef);
+    }
+    .card-kabir::before {
+        background: linear-gradient(90deg, #10b981, #059669);
+    }
+    
+    .developer-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+    
+    .avatar-wrapper {
+        position: relative;
+        width: 130px;
+        height: 130px;
+        margin: 30px auto 20px auto;
+        z-index: 1;
+    }
+    
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #ffffff;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+        transition: all 0.4s ease;
+    }
+    
+    .developer-card:hover .avatar-img {
+        transform: scale(1.05);
+        border-color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .avatar-glow {
+        position: absolute;
+        top: -10%;
+        left: -10%;
+        right: -10%;
+        bottom: -10%;
+        border-radius: 50%;
+        filter: blur(15px);
+        opacity: 0.15;
+        z-index: -1;
+        transition: all 0.4s ease;
+    }
+    
+    .developer-card:hover .avatar-glow {
+        opacity: 0.25;
+        transform: scale(1.1);
+    }
+    
+    .glow-aarav { background: #6366f1; }
+    .glow-nisha { background: #ec4899; }
+    .glow-kabir { background: #10b981; }
+    
+    .dev-social-link {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .dev-social-link:hover {
+        background: var(--primary-text, #0f172a);
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+    
+    .dev-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 5px 12px;
+        border-radius: 30px;
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+    
+    .badge-aarav {
+        background-color: rgba(99, 102, 241, 0.1);
+        color: #4f46e5;
+    }
+    .badge-nisha {
+        background-color: rgba(236, 72, 153, 0.1);
+        color: #db2777;
+    }
+    .badge-kabir {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #059669;
+    }
+    
+    .skills-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+        margin-top: 15px;
+    }
+    
+    .skill-tag {
+        font-size: 0.75rem;
+        background-color: #f1f5f9;
+        color: #475569;
+        padding: 3px 8px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        font-weight: 500;
+    }
+    
+    .card-body-custom {
+        padding: 0 25px 25px 25px;
+        text-align: center;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .dev-quote {
+        font-style: italic;
+        font-size: 0.88rem;
+        color: #64748b;
+        margin-top: 15px;
+        position: relative;
+    }
+    
+    .dev-quote::before, .dev-quote::after {
+        content: '"';
+        font-family: Georgia, serif;
+        font-size: 1.2rem;
+        color: #cbd5e1;
+        line-height: 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 120px; padding-bottom: 80px;">
+    <!-- Dev Header Split Section with overlapping layers -->
+    <div class="dev-header-section mb-5">
+        <div class="row align-items-center g-4 w-100 m-0">
+            <!-- Left Column: Typography (overlays on top of illustration) -->
+            <div class="col-lg-7 dev-text-column p-0">
+                <span class="badge bg-light text-dark px-3 py-2 border mb-3">OUR CORE CREATORS</span>
+                <h1 class="display-6 fw-bold text-dark tracking-tight mb-3">Meet Our <span class="accent-outline" style="-webkit-text-stroke: 1.5px var(--primary-text); color: transparent; font-weight: 300;">Developers</span></h1>
+                
+                <p class="text-secondary mb-3" style="font-size: 1.05rem; line-height: 1.6;">
+                    The passionate engineering and design team behind the HyperLocal platform, working hard to deliver seamless local services to your doorsteps.
+                </p>
+                
+                <hr class="my-3" style="max-width: 100px; opacity: 0.15; border-color: var(--primary-text); margin-left: 0; margin-right: auto;">
+                
+                <h4 class="fs-5 fw-bold mb-2 text-dark">Building a Safer, Faster & Reliable Local Network</h4>
+                <p class="text-secondary mb-0" style="font-size: 0.94rem; line-height: 1.55;">
+                    Our team brings together years of experience in distributed systems, clean modern UI design, and transaction security. By blending cutting-edge tools with a customer-centric philosophy, we are working to elevate service standards across Muzaffarpur and beyond.
+                </p>
+            </div>
+            
+            <!-- Right Column: Illustration (slides slightly left under the text, aligned right) -->
+            <div class="col-lg-5 dev-illustration-column text-end">
+                <div class="dev-illustration-container">
+                    <img src="{% static 'images/dev_bg.jpg' %}" alt="Team Collaboration Illustration" class="img-fluid dev-hero-illustration">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Developers Grid -->
+    <div class="row g-4 justify-content-center">
+        <!-- Developer 1: Akash Kumar -->
+        <div class="col-md-6 col-lg-4">
+            <div class="developer-card card-aarav">
+                <div class="avatar-wrapper">
+                    <div class="avatar-glow glow-aarav"></div>
+                    <img src="{% static 'images/avatar_akash.jpg' %}" alt="Akash Kumar" class="avatar-img">
+                </div>
+                <div class="card-body-custom">
+                    <div>
+                        <span class="dev-badge badge-aarav">Django Full stack Developer</span>
+                        <h4 class="fw-bold text-dark mb-1">Akash Kumar</h4>
+                        <p class="text-muted small mb-3">Full Stack Engineer</p>
+                        <p class="text-secondary small mb-3">
+                            Akash is a dedicated Django Full Stack Developer who built our secure booking checkout, instant messaging protocols, and reviews pipeline.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="skills-container mb-3">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">HTML</span>
+                            <span class="skill-tag">CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                        </div>
+                        <p class="dev-quote">Ensure it is secure, ensure it is tested, then ship it seamlessly.</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <a href="https://github.com/akashprajapati12" target="_blank" class="dev-social-link" title="GitHub">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                            </a>
+                            <a href="https://www.linkedin.com/in/akash-kumar-prajapati087114?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="dev-social-link" title="LinkedIn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                            </a>
+                            <a href="mailto:akashairmen24@gmail.com" class="dev-social-link" title="Email">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Developer 2: Priya Ranjan -->
+        <div class="col-md-6 col-lg-4">
+            <div class="developer-card card-nisha">
+                <div class="avatar-wrapper">
+                    <div class="avatar-glow glow-nisha"></div>
+                    <img src="{% static 'images/avatar_priya.jpg' %}" alt="Priya Ranjan" class="avatar-img" style="object-position: center 20%;">
+                </div>
+                <div class="card-body-custom">
+                    <div>
+                        <span class="dev-badge badge-nisha">Django Full stack Developer</span>
+                        <h4 class="fw-bold text-dark mb-1">Priya Ranjan</h4>
+                        <p class="text-muted small mb-3">Lead Django Developer & Co-Founder</p>
+                        <p class="text-secondary small mb-3">
+                            Priya is an expert full stack Django developer who engineered our robust backend middlewares, secure session controllers, and database architectures.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="skills-container mb-3">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">HTML</span>
+                            <span class="skill-tag">CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                        </div>
+                        <p class="dev-quote">Creating elegant full-stack ecosystems with clean, modern code is my passion.</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <a href="https://www.linkedin.com/in/priya-ranjan2005?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="dev-social-link" title="LinkedIn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                            </a>
+                            <a href="mailto:priyaranjan131205@gmail.com" class="dev-social-link" title="Email">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Developer 3: Shresth Vijayanth Verma -->
+        <div class="col-md-6 col-lg-4">
+            <div class="developer-card card-kabir">
+                <div class="avatar-wrapper">
+                    <div class="avatar-glow glow-kabir"></div>
+                    <img src="{% static 'images/avatar_shresth.jpg' %}" alt="Shresth Vijayanth Verma" class="avatar-img">
+                </div>
+                <div class="card-body-custom">
+                    <div>
+                        <span class="dev-badge badge-kabir">Django Full stack Developer</span>
+                        <h4 class="fw-bold text-dark mb-1">Shresth Vijayanth Verma</h4>
+                        <p class="text-muted small mb-3">Backend Architect & Full Stack Developer</p>
+                        <p class="text-secondary small mb-3">
+                            Shresth is a highly skilled Django Full Stack Developer who built our background services engine, notification alerts, and database cache.
+                        </p>
+                    </div>
+                    <div>
+                        <div class="skills-container mb-3">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">HTML</span>
+                            <span class="skill-tag">CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                        </div>
+                        <p class="dev-quote">Optimizing databases and scaling secure systems is what drives me.</p>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <a href="https://github.com/shresth006" target="_blank" class="dev-social-link" title="GitHub">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+                            </a>
+                            <a href="https://www.linkedin.com/in/shresth-verma-33a908380?utm_source=share_via&utm_content=profile&utm_medium=member_android" target="_blank" class="dev-social-link" title="LinkedIn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+                            </a>
+                            <a href="mailto:shresth095@gmail.com" class="dev-social-link" title="Email">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -31,15 +31,6 @@ class UnifiedRegistrationForm(UserCreationForm):
     }))
 
     # Provider-specific fields (only required when role=provider)
-    skill = forms.CharField(max_length=200, required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control', 'placeholder': 'Primary Skill (e.g., Plumbing, Electrical)'
-    }))
-    location = forms.CharField(max_length=200, required=False, widget=forms.TextInput(attrs={
-        'class': 'form-control', 'placeholder': 'Service Location'
-    }))
-    bio = forms.CharField(required=False, widget=forms.Textarea(attrs={
-        'class': 'form-control', 'placeholder': 'Tell us about yourself and your experience', 'rows': 3
-    }))
     document = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={
         'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'
     }), help_text='Upload ID proof or skill certificate (PDF, JPG, PNG)')
@@ -56,16 +47,6 @@ class UnifiedRegistrationForm(UserCreationForm):
         self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirm Password'})
 
-    def clean(self):
-        cleaned_data = super().clean()
-        role = cleaned_data.get('role')
-        if role == 'provider':
-            if not cleaned_data.get('skill'):
-                self.add_error('skill', 'Skill is required for providers.')
-            if not cleaned_data.get('location'):
-                self.add_error('location', 'Location is required for providers.')
-        return cleaned_data
-
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = self.cleaned_data['role']
@@ -76,9 +57,9 @@ class UnifiedRegistrationForm(UserCreationForm):
                 from providers.models import ServiceProvider
                 ServiceProvider.objects.create(
                     user=user,
-                    skill=self.cleaned_data['skill'],
-                    location=self.cleaned_data['location'],
-                    bio=self.cleaned_data.get('bio', ''),
+                    skill='',
+                    location='',
+                    bio='',
                     document=self.files.get('document') if self.files.get('document') else None,
                 )
         return user

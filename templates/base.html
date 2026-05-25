@@ -17,7 +17,7 @@
 {% block navbar %}
 <nav class="navbar navbar-expand-lg navbar-glass fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}{% url 'home' %}{% endif %}">
+        <a class="navbar-brand" href="{% url 'home' %}">
             <i data-lucide="map-pin" class="me-2" style="width:20px;height:20px;stroke-width:1.8;vertical-align:-2px;"></i><span class="brand-hyper">Hyper</span><span class="brand-local">Local</span>
         </a>
         
@@ -48,14 +48,14 @@
                     {% if user.role == 'customer' %}
                         <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'service_list' %}">Services</a></li>
-                        <li class="nav-item"><a class="nav-link" href="{% url 'customer_dashboard' %}">Dashboard</a></li>
+                        
                         <li class="nav-item"><a class="nav-link" href="{% url 'booking_history' %}">My Bookings</a></li>
                     {% elif user.role == 'provider' %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'provider_dashboard' %}">Dashboard</a></li>
+                        
                         <li class="nav-item"><a class="nav-link" href="{% url 'my_services' %}">My Services</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_requests' %}">Requests</a></li>
                     {% elif user.role == 'admin' %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">Dashboard</a></li>
+                        
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_users' %}">Users</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_providers' %}">Providers</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_bookings' %}">Bookings</a></li>
@@ -123,9 +123,7 @@
                     <li class="mb-2"><a href="{% url 'about' %}">About Us</a></li>
                     <li class="mb-2"><a href="{% url 'contact' %}">Contact Us</a></li>
                     <li class="mb-2"><a href="{% url 'feedback' %}">Feedback</a></li>
-                    {% if not user.is_authenticated %}
-                        <li class="mb-2"><a href="{% url 'register' %}">Sign Up</a></li>
-                    {% endif %}
+                    <li class="mb-2"><a href="{% url 'developers' %}">Our Developer</a></li>
                 </ul>
             </div>
             <div class="col-lg-3">

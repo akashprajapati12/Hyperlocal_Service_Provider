@@ -1,48 +1,64 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Login — HyperLocal{% endblock %}
 
 {% block content %}
+<div class="text-center mb-2" style="margin-top:20px;">
+    <span id="login-greeting-msg" class="text-uppercase fw-bold text-dark" style="font-family:'Poppins'; font-size:1.05rem; letter-spacing:0.08em; color:#000000 !important;"></span>
+</div>
 <div class="auth-wrapper">
-    <div class="auth-card" style="max-width:400px">
-        <div class="text-center mb-4">
-            {% comment %} Updated brand to match header {% endcomment %}
-            <a href="{% url 'home' %}" class="navbar-brand d-inline-flex align-items-center justify-content-center"
-                style="font-family:'Poppins';font-weight:700;font-size:2rem;letter-spacing:0.05em;">
-                <i data-lucide="map-pin" class="me-2"
-                    style="width:20px;height:20px;stroke-width:1.8;vertical-align:-2px;color:#000000;"></i>
-                <span class="brand-hyper"
-                    style="color:transparent;-webkit-text-stroke:1px #000000;font-weight:700;">Hyper</span>
-                <span class="brand-local" style="color:#000000;font-weight:700;">Local</span>
-            </a>
+
+    <div class="login-container d-flex flex-column flex-md-row">
+        <!-- Left Column: The Login Form -->
+        <div class="login-form-side">
+            <div class="text-center mb-4">
+                {% comment %} Updated brand to match header {% endcomment %}
+                <a href="{% url 'home' %}" class="navbar-brand d-inline-flex align-items-center justify-content-center"
+                    style="font-family:'Poppins';font-weight:700;font-size:2rem;letter-spacing:0.05em;">
+                    <i data-lucide="map-pin" class="me-2"
+                        style="width:20px;height:20px;stroke-width:1.8;vertical-align:-2px;color:#000000;"></i>
+                    <span class="brand-hyper"
+                        style="color:transparent;-webkit-text-stroke:1px #000000;font-weight:700;">Hyper</span>
+                    <span class="brand-local" style="color:#000000;font-weight:700;">Local</span>
+                </a>
+            </div>
+            <div class="text-center mb-2">
+    <span id="login-greeting-msg" class="text-uppercase fw-bold text-dark" style="font-family:'Poppins'; font-size:1.05rem; letter-spacing:0.08em; color:#000000 !important;"></span>
+            </div>
+            <h2 class="text-center">Welcome Back</h2>
+            <p class="subtitle text-center">Sign in to your account</p>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    {{ form.username }}
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        {{ form.password }}
+                        <span class="input-group-text bg-transparent" id="togglePassword" style="cursor: pointer; border-left: none; border-color: var(--border-color);">
+                            <i data-lucide="eye" style="width:16px;height:16px;color: var(--secondary-text);"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="mb-4 d-flex align-items-center justify-content-between">
+                    <div class="form-check">
+                        {{ form.remember_me }}
+                        <label class="form-check-label text-muted small" for="remember_me" style="cursor:pointer; user-select:none; margin-left:0.25rem; vertical-align:middle;">Remember Me</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Sign In</button>
+            </form>
+            <div class="text-center">
+                <small class="d-block text-muted">Don't have an account? <a href="{% url 'register' %}"
+                        class="fw-semibold text-decoration-underline text-dark">Sign Up</a></small>
+            </div>
         </div>
-        <h2 class="text-center">Welcome Back</h2>
-        <p class="subtitle text-center">Sign in to your account</p>
-        <form method="POST">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label class="form-label">Username</label>
-                {{ form.username }}
-            </div>
-            <div class="mb-4">
-                <label class="form-label">Password</label>
-                <div class="input-group">
-                    {{ form.password }}
-                    <span class="input-group-text bg-transparent" id="togglePassword" style="cursor: pointer; border-left: none; border-color: var(--border-color);">
-                        <i data-lucide="eye" style="width:16px;height:16px;color: var(--secondary-text);"></i>
-                    </span>
-                </div>
-            </div>
-            <div class="mb-4 d-flex align-items-center justify-content-between">
-                <div class="form-check">
-                    {{ form.remember_me }}
-                    <label class="form-check-label text-muted small" for="remember_me" style="cursor:pointer; user-select:none; margin-left:0.25rem; vertical-align:middle;">Remember Me</label>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Sign In</button>
-        </form>
-        <div class="text-center">
-            <small class="d-block text-muted">Don't have an account? <a href="{% url 'register' %}"
-                    class="fw-semibold text-decoration-underline text-dark">Sign Up</a></small>
+        
+        <!-- Right Column: The Login Illustration (Same height as the form) -->
+        <div class="login-image-side d-none d-md-block">
+            <img src="{% static 'images/login_illustration.jpg' %}" alt="Login Illustration" class="login-ill-img">
         </div>
     </div>
 </div>
@@ -61,12 +77,70 @@
         border-top-right-radius: var(--radius) !important;
         border-bottom-right-radius: var(--radius) !important;
     }
+    
+    /* Premium Split Screen Login CSS */
+    .login-container {
+        background-color: var(--white) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg) !important;
+        max-width: 1020px;
+        width: 100%;
+        overflow: hidden;
+        margin: 0 auto;
+    }
+    
+    .login-form-side {
+        flex: 0 0 400px;
+        padding: 3rem 2.5rem !important;
+        width: 100%;
+    }
+    
+    .login-image-side {
+        flex: 1;
+        background-color: #d0dce1 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .login-ill-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+    }
+    
+    @media (max-width: 767.98px) {
+        .login-container {
+            max-width: 440px;
+        }
+        .login-form-side {
+            padding: 2.25rem !important;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    // Dynamic Time-Based Greeting
+    const greetingMsg = document.getElementById('login-greeting-msg');
+    if (greetingMsg) {
+        const hour = new Date().getHours();
+        let greeting = "Good Evening";
+        if (hour < 12) {
+            greeting = "Good Morning";
+        } else if (hour < 17) {
+            greeting = "Good Afternoon";
+        }
+        greetingMsg.textContent = `${greeting}! Welcome back to HyperLocal.`;
+    }
+
     // Password visibility toggle logic
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.querySelector('input[name="password"]');
