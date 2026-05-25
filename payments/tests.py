@@ -189,9 +189,9 @@ class PaymentsTestCase(TestCase):
         self.assertEqual(payment.payment_status, 'paid')
         self.assertEqual(float(payment.amount), 500.00)
         self.booking.refresh_from_db()
-        self.assertEqual(self.booking.status, 'confirmed')
+        self.assertEqual(self.booking.status, 'pending')
 
-    def test_provider_approve_payment_confirms_booking(self):
+    def test_provider_approve_payment_does_not_confirm_booking(self):
         payment = Payment.objects.create(
             booking=self.booking,
             amount=500.00,
@@ -207,7 +207,7 @@ class PaymentsTestCase(TestCase):
         self.booking.refresh_from_db()
         payment.refresh_from_db()
         self.assertEqual(payment.payment_status, 'paid')
-        self.assertEqual(self.booking.status, 'confirmed')
+        self.assertEqual(self.booking.status, 'pending')
 
     def test_upi_payment_view_post_failed_simulation(self):
         Payment.objects.create(

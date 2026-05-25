@@ -61,12 +61,6 @@ class Payment(models.Model):
 
         super().save(*args, **kwargs)
 
-        # Automatically confirm the booking when payment is verified
-        if self.booking:
-            if (self.payment_status == 'paid' or self.status == 'success') and self.booking.status != 'confirmed':
-                self.booking.status = 'confirmed'
-                self.booking.save()
-
     class Meta:
         verbose_name = 'Payment'
         verbose_name_plural = 'Payments'

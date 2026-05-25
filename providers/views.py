@@ -150,10 +150,6 @@ def manage_requests_view(request):
                 payment.payment_status = 'paid'
                 payment.save()
                 
-                # Automatically confirm booking when payment is approved by provider
-                booking.status = 'confirmed'
-                booking.save()
-                
                 from users.models import Notification
                 Notification.objects.create(
                     user=booking.user,
