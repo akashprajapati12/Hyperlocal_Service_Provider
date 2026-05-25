@@ -25,7 +25,18 @@
             </div>
             <div class="mb-4">
                 <label class="form-label">Password</label>
-                {{ form.password }}
+                <div class="input-group">
+                    {{ form.password }}
+                    <span class="input-group-text bg-transparent" id="togglePassword" style="cursor: pointer; border-left: none; border-color: var(--border-color);">
+                        <i data-lucide="eye" style="width:16px;height:16px;color: var(--secondary-text);"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="mb-4 d-flex align-items-center justify-content-between">
+                <div class="form-check">
+                    {{ form.remember_me }}
+                    <label class="form-check-label text-muted small" for="remember_me" style="cursor:pointer; user-select:none; margin-left:0.25rem; vertical-align:middle;">Remember Me</label>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary w-100 py-2 mb-3">Sign In</button>
         </form>
@@ -35,4 +46,70 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .input-group .form-control {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none !important;
+    }
+    .input-group .input-group-text {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: var(--radius) !important;
+        border-bottom-right-radius: var(--radius) !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Password visibility toggle logic
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.querySelector('input[name="password"]');
+    
+    if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            // Reinitialize Lucide icons in this element
+            lucide.createIcons();
+        });
+    }
+
+    // Remember Me Autofill Logic
+    const loginForm = document.querySelector('form');
+    const usernameInput = document.querySelector('input[name="username"]');
+    const rememberMeCheckbox = document.getElementById('remember_me');
+
+    if (loginForm && usernameInput && passwordInput && rememberMeCheckbox) {
+        // Retrieve and autofill credentials if they were saved previously
+        if (localStorage.getItem('remember_me_username') && localStorage.getItem('remember_me_password')) {
+            usernameInput.value = localStorage.getItem('remember_me_username');
+            passwordInput.value = localStorage.getItem('remember_me_password');
+            rememberMeCheckbox.checked = true;
+        }
+
+        // On submission, store credentials if Remember Me is checked, otherwise clear
+        loginForm.addEventListener('submit', function() {
+            if (rememberMeCheckbox.checked) {
+                localStorage.setItem('remember_me_username', usernameInput.value);
+                localStorage.setItem('remember_me_password', passwordInput.value);
+            } else {
+                localStorage.removeItem('remember_me_username');
+                localStorage.removeItem('remember_me_password');
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

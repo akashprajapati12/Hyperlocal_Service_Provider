@@ -2,7 +2,7 @@
 {% block title %}Booking History — HyperLocal{% endblock %}
 
 {% block content %}
-<div style="padding-top:100px" class="container">
+<div style="padding-top:100px; padding-bottom:80px;" class="container">
     <h3 class="mb-4" style="font-family:'Poppins'">Booking History</h3>
     <div class="d-flex flex-wrap gap-2 mb-4">
         <a href="{% url 'booking_history' %}" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
@@ -13,14 +13,20 @@
     </div>
     <div class="card p-4">
         {% if bookings %}
-        <div class="table-responsive recent-bookings-scroll">
+        <div class="table-responsive recent-bookings-scroll" style="max-height: 375px; border: 1px solid #e0e0e0; border-radius: 4px;">
             <table class="table table-modern mb-0">
-                <thead><tr><th>#</th><th>Service</th><th>Provider</th><th>Date</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
-            </table>
-            <!-- Scrollable container for table body -->
-            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
-                <table class="table table-modern mb-0">
-                    <tbody>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Service</th>
+                        <th>Provider</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for b in bookings %}
                     <tr>
                         <td>{{ b.id }}</td>
@@ -29,12 +35,11 @@
                         <td>{{ b.booking_date }}</td>
                         <td>₹{{ b.service.price }}</td>
                         <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
-                        <td><a href="{% url 'booking_detail' b.id %}" class="btn btn-sm btn-outline-primary">View</a></td>
+                        <td><a href="{% url 'booking_detail' b.id %}" class="btn btn-sm btn-outline-primary py-1 px-2.5">View</a></td>
                     </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
         {% else %}
         <p class="text-muted text-center py-4 small mb-0">No bookings found.</p>

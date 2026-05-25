@@ -7,15 +7,20 @@
     <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="inbox" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Booking Requests</h4>
     <div class="card p-4">
         {% if bookings %}
-        <div class="table-responsive">
+        <div class="table-responsive recent-bookings-scroll" style="max-height: 375px; border: 1px solid #e0e0e0; border-radius: 4px;">
             <table class="table table-modern mb-0">
-                <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th><th>Payment</th><th>Actions</th></tr></thead>
-
-            </table>
-            <!-- Scrollable container for table body -->
-            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
-                <table class="table table-modern mb-0">
-                    <tbody>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for b in bookings %}
                     <tr>
                         <td><a href="{% url 'booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
@@ -67,9 +72,8 @@
                         </td>
                     </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
         {% else %}
         <div class="text-center py-4 text-muted">

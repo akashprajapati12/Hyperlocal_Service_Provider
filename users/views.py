@@ -72,9 +72,14 @@ def login_view(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            remember_me = form.cleaned_data.get('remember_me', False)
             user = authenticate(request, username=username, password=password)
             if user is not None:
                 login(request, user)
+                if remember_me:
+                    request.session.set_expiry(1209600)  # 2 weeks
+                else:
+                    request.session.set_expiry(0)        # Browser close
                 messages.success(request, f'Welcome back, {user.first_name or user.username}!')
                 # Role-based redirect
                 if user.role == 'admin':

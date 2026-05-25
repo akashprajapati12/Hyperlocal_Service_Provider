@@ -13,15 +13,20 @@
         <a href="{% url 'manage_bookings' %}?status=cancelled" class="filter-btn {% if status_filter == 'cancelled' %}active{% endif %}">Cancelled</a>
     </div>
     <div class="card p-4">
-        <div class="table-responsive">
+        <div class="table-responsive recent-bookings-scroll" style="max-height: 375px; border: 1px solid #e0e0e0; border-radius: 4px;">
             <table class="table table-modern mb-0">
-                <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Provider</th><th>Date</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
-
-            </table>
-            <!-- Scrollable container for table body -->
-            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
-                <table class="table table-modern mb-0">
-                    <tbody>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Provider</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for b in bookings %}
                     <tr>
                         <td><a href="{% url 'admin_booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
@@ -39,9 +44,8 @@
                     {% empty %}
                     <tr><td colspan="7" class="text-center text-muted py-4 small">No bookings found.</td></tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

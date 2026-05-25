@@ -60,14 +60,18 @@
     <div class="card p-4">
         <h5 class="mb-3">Recent Bookings</h5>
         {% if recent_bookings %}
-        <div class="table-responsive recent-bookings-scroll">
+        <div class="table-responsive recent-bookings-scroll" style="max-height: 375px; border: 1px solid #e0e0e0; border-radius: 4px;">
             <table class="table table-modern mb-0">
-                <thead><tr><th>#</th><th>Customer</th><th>Service</th><th>Date</th><th>Status</th></tr></thead>
-            </table>
-            <!-- Scrollable container for table body -->
-            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
-                <table class="table table-modern mb-0">
-                    <tbody>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for b in recent_bookings %}
                     <tr>
                         <td><a href="{% url 'booking_detail' b.id %}" class="fw-bold text-primary text-decoration-none">#{{ b.id }}</a></td>
@@ -77,9 +81,8 @@
                         <td><span class="badge badge-{{ b.status }} px-3 py-1">{{ b.get_status_display }}</span></td>
                     </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
         {% else %}
         <p class="text-muted text-center py-3">No bookings yet.</p>

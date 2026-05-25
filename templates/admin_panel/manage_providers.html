@@ -6,14 +6,20 @@
 <div class="container dashboard-content">
     <h4 class="mb-4" style="font-family:'Poppins'"><i data-lucide="award" class="me-2" style="width:20px;height:20px;vertical-align:-2px;"></i>Manage Providers</h4>
     <div class="card p-4">
-        <div class="table-responsive">
+        <div class="table-responsive recent-bookings-scroll" style="max-height: 375px; border: 1px solid #e0e0e0; border-radius: 4px;">
             <table class="table table-modern mb-0">
-                <thead><tr><th>ID</th><th>Name</th><th>Skill</th><th>Location</th><th>Document</th><th>Verified</th><th>Action</th></tr></thead>
-            </table>
-            <!-- Scrollable container for table body -->
-            <div style="max-height: 375px; overflow-y: auto; border: 1px solid #e0e0e0; border-top: none;">
-                <table class="table table-modern mb-0">
-                    <tbody>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Skill</th>
+                        <th>Location</th>
+                        <th>Document</th>
+                        <th>Verified</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
                     {% for p in providers %}
                     <tr>
                         <td>{{ p.id }}</td>
@@ -40,9 +46,8 @@
                         </td>
                     </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
