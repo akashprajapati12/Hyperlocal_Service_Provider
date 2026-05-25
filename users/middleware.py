@@ -31,6 +31,39 @@ class TabSessionMiddleware(SessionMiddleware):
 
         # Retrieve the dynamic cookie name set during request processing
         cookie_name = getattr(request, 'session_cookie_name', settings.SESSION_COOKIE_NAME)
+
+        # If the response is a redirect, automatically append the tab parameter to the redirect Location URL
+        if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response:
+            tab_id = request.GET.get('tab') or request.POST.get('tab')
+            if not tab_id:
+                referer = request.META.get('HTTP_REFERER')
+                if referer:
+                    from urllib.parse import urlparse, parse_qs
+                    parsed = urlparse(referer)
+                    queries = parse_qs(parsed.query)
+                    tab_id = queries.get('tab', [None])[0]
+            
+            if tab_id:
+                location = response['Location']
+                # Check if location is same-origin or relative
+                if location.startswith('/') or location.startswith(request.build_absolute_uri('/')[:-1]):
+                    from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode
+                    parsed_loc = urlparse(location)
+                    queries = parse_qsl(parsed_loc.query)
+                    # Only append if not already present
+                    if not any(k == 'tab' for k, v in queries):
+                        queries.append(('tab', tab_id))
+                        new_query = urlencode(queries)
+                        # Rebuild the redirect location
+                        response['Location'] = urlunparse((
+                            parsed_loc.scheme,
+                            parsed_loc.netloc,
+                            parsed_loc.path,
+                            parsed_loc.params,
+                            new_query,
+                            parsed_loc.fragment
+                        ))
+
         if cookie_name != settings.SESSION_COOKIE_NAME:
             # If default cookie was set by super().process_response, rename it to the dynamic one
             if settings.SESSION_COOKIE_NAME in response.cookies:
