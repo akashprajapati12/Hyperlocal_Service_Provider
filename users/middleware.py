@@ -67,17 +67,14 @@ class TabSessionMiddleware(SessionMiddleware):
         if cookie_name != settings.SESSION_COOKIE_NAME:
             # If default cookie was set by super().process_response, rename it to the dynamic one
             if settings.SESSION_COOKIE_NAME in response.cookies:
-                cookie_val = response.cookies[settings.SESSION_COOKIE_NAME]
-                response.cookies[cookie_name] = cookie_val
+                morsel = response.cookies[settings.SESSION_COOKIE_NAME]
+                # Extract the pure session key value from the morsel
+                response.cookies[cookie_name] = morsel.value
                 
                 # Copy all cookie attributes (max-age, path, domain, secure, httponly, samesite, etc.)
-                response.cookies[cookie_name]['path'] = cookie_val['path']
-                response.cookies[cookie_name]['domain'] = cookie_val['domain']
-                response.cookies[cookie_name]['secure'] = cookie_val['secure']
-                response.cookies[cookie_name]['httponly'] = cookie_val['httponly']
-                response.cookies[cookie_name]['expires'] = cookie_val['expires']
-                response.cookies[cookie_name]['max-age'] = cookie_val['max-age']
-                response.cookies[cookie_name]['samesite'] = cookie_val['samesite']
+                for k, v in morsel.items():
+                    if v:
+                        response.cookies[cookie_name][k] = v
 
                 # Delete the default cookie to prevent session leakage/pollution
                 del response.cookies[settings.SESSION_COOKIE_NAME]
