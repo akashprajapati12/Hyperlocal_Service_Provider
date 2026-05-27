@@ -127,12 +127,6 @@ def manage_requests_view(request):
                 title="Booking Accepted",
                 message=f"Your service has been accepted (Booking #{booking.id})"
             )
-            Notification.objects.create(
-                user=booking.provider.user,
-                booking=booking,
-                title="Booking Confirmed",
-                message=f"You have accepted the booking. Contact information and chat are now active. (Booking #{booking.id})"
-            )
             messages.success(request, f'Booking #{booking.id} confirmed!')
         elif action == 'reject':
             booking.status = 'cancelled'

@@ -57,7 +57,10 @@ def register_view(request):
                 return redirect('provider_dashboard')
             return redirect('customer_dashboard')
     else:
-        form = UnifiedRegistrationForm()
+        role = request.GET.get('role', 'customer')
+        if role not in ['customer', 'provider']:
+            role = 'customer'
+        form = UnifiedRegistrationForm(initial={'role': role})
 
     return render(request, 'users/register.html', {'form': form})
 
@@ -156,6 +159,41 @@ def about_view(request):
 def contact_view(request):
     """Contact Us page."""
     if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        subject = request.POST.get('subject', '').strip()
+        message = request.POST.get('message', '').strip()
+
+        # Build user type information
+        if request.user.is_authenticated:
+            user_type = f"Registered User: {request.user.username} ({request.user.email})"
+        else:
+            user_type = "Guest"
+
+        # Build notification content
+        notif_title = f"New Contact Us: {subject[:50]}"
+        notif_message = (
+            f"A new Contact Us message has been submitted.\n\n"
+            f"Details:\n"
+            f"- Full Name: {name}\n"
+            f"- Email: {email}\n"
+            f"- Subject: {subject}\n"
+            f"- Submitted By: {user_type}\n\n"
+            f"Message:\n"
+            f"{message}"
+        )
+
+        # Notify all admins & superusers
+        from users.models import Notification, UserProfile
+        from django.db.models import Q
+        admins = UserProfile.objects.filter(Q(role='admin') | Q(is_superuser=True)).distinct()
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                title=notif_title,
+                message=notif_message
+            )
+
         messages.success(request, 'Thank you! Your message has been received. We will get back to you shortly.')
         return redirect('contact')
     return render(request, 'contact.html')
@@ -164,6 +202,48 @@ def contact_view(request):
 def feedback_view(request):
     """Feedback page."""
     if request.method == 'POST':
+        rating = request.POST.get('rating', '').strip()
+        feedback_type = request.POST.get('feedback_type', '').strip()
+        comments = request.POST.get('comments', '').strip()
+
+        feedback_types = {
+            'service_quality': 'Service Quality',
+            'app_performance': 'Website / App Experience',
+            'provider_behavior': 'Provider Experience',
+            'pricing_payment': 'Pricing & Payments',
+            'other': 'Other Inquiry / Suggestions'
+        }
+        feedback_type_display = feedback_types.get(feedback_type, feedback_type)
+
+        # Build user type information
+        if request.user.is_authenticated:
+            user_type = f"Registered User: {request.user.username} ({request.user.email})"
+        else:
+            user_type = "Guest"
+
+        # Build notification content
+        notif_title = f"New Feedback ({rating} Stars)"
+        notif_message = (
+            f"New customer feedback has been received.\n\n"
+            f"Details:\n"
+            f"- Overall Rating: {rating} / 5\n"
+            f"- Feedback Type: {feedback_type_display}\n"
+            f"- Submitted By: {user_type}\n\n"
+            f"Comments:\n"
+            f"{comments}"
+        )
+
+        # Notify all admins & superusers
+        from users.models import Notification, UserProfile
+        from django.db.models import Q
+        admins = UserProfile.objects.filter(Q(role='admin') | Q(is_superuser=True)).distinct()
+        for admin in admins:
+            Notification.objects.create(
+                user=admin,
+                title=notif_title,
+                message=notif_message
+            )
+
         messages.success(request, 'Thank you for your valuable feedback!')
         return redirect('feedback')
     return render(request, 'feedback.html')
@@ -229,8 +309,24 @@ def notification_click_view(request, notif_id):
         title_lower = notification.title.lower()
         if "chat" in title_lower or "message" in title_lower:
             return redirect('booking_chat', booking_id=notification.booking.id)
+        elif request.user.role == 'provider' and title_lower == "new booking request":
+            return redirect('manage_requests')
         else:
             return redirect('booking_detail', booking_id=notification.booking.id)
             
-    return redirect('notifications')
+    return redirect('notification_detail', notif_id=notification.id)
+
+
+@login_required
+def notification_detail_view(request, notif_id):
+    """View details of a specific notification (e.g. feedback or contact message)."""
+    from .models import Notification
+    notification = get_object_or_404(Notification, id=notif_id, user=request.user)
+    
+    # Mark as read when explicitly viewed in detail
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save()
+        
+    return render(request, 'users/notification_detail.html', {'notification': notification})
 

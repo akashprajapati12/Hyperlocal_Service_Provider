@@ -56,6 +56,36 @@ class BookingForm(forms.ModelForm):
         custom_start = cleaned_data.get('custom_start_time')
         custom_end = cleaned_data.get('custom_end_time')
 
+        # Block past time slots on today's date in local timezone (Asia/Kolkata)
+        from django.utils import timezone
+        import datetime
+        
+        if booking_date:
+            local_now = timezone.localtime(timezone.now())
+            if booking_date == local_now.date():
+                SLOT_START_HOURS = {
+                    '09_10': 9,
+                    '10_11': 10,
+                    '11_12': 11,
+                    '12_13': 12,
+                    '13_14': 13,
+                    '14_15': 14,
+                    '15_16': 15,
+                    '16_17': 16,
+                    '17_18': 17,
+                    '18_19': 18,
+                }
+                if time_slot in SLOT_START_HOURS:
+                    if local_now.hour >= SLOT_START_HOURS[time_slot]:
+                        self.add_error('time_slot', 'This time slot has already passed for today.')
+                elif time_slot == 'custom' and custom_start:
+                    custom_start_dt = timezone.make_aware(
+                        datetime.datetime.combine(booking_date, custom_start),
+                        timezone.get_current_timezone()
+                    )
+                    if custom_start_dt < local_now:
+                        self.add_error('custom_start_time', 'Selected start time has already passed for today.')
+
         if time_slot == 'custom':
             if not custom_start:
                 self.add_error('custom_start_time', 'Start time is required for custom slots.')

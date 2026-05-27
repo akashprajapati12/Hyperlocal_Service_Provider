@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}{{ notification.title }} — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:110px; min-height: 80vh; margin-bottom:80px;" class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Breadcrumbs / Back button -->
+            <div class="mb-4">
+                <a href="{% url 'notifications' %}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    <i data-lucide="arrow-left" class="me-1" style="width:16px;height:16px;"></i> Back to Notifications
+                </a>
+            </div>
+
+            <!-- Detail Card -->
+            <div class="card p-4 shadow-sm border-0 bg-white" style="border-radius: var(--radius-lg);">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--border-color) !important;">
+                    <div class="p-2.5 rounded-circle flex-shrink-0" 
+                         style="background-color: {% if 'Feedback' in notification.title %}#fff8e1{% else %}#e8eaf6{% endif %}; 
+                                color: {% if 'Feedback' in notification.title %}#f57f17{% else %}#3f51b5{% endif %}; 
+                                display: flex; align-items: center; justify-content: center; width: 48px; height: 48px;">
+                        {% if 'Feedback' in notification.title %}
+                        <i data-lucide="message-square-heart" style="width: 24px; height: 24px;"></i>
+                        {% else %}
+                        <i data-lucide="mail" style="width: 24px; height: 24px;"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h4 class="mb-1 fw-bold" style="font-family:'Poppins'; color: var(--primary-text);">{{ notification.title }}</h4>
+                        <p class="text-muted mb-0 small">{{ notification.created_at|naturaltime }} ({{ notification.created_at|date:"d M Y at h:i A" }})</p>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <h5 class="fw-semibold mb-3" style="font-family:'Poppins'; color: var(--secondary-text);">Submission Content</h5>
+                    
+                    <div class="p-4 bg-light border rounded-3" style="border-radius: var(--radius) !important; border-color: var(--border-color) !important;">
+                        <pre style="white-space: pre-wrap; font-family: inherit; font-size: 0.95rem; line-height: 1.6; margin-bottom: 0; color: var(--primary-text);">{{ notification.message }}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}

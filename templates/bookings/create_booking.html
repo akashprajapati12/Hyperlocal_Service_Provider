@@ -1,6 +1,112 @@
 {% extends 'base.html' %}
 {% block title %}Book Service — HyperLocal{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* AM/PM Toggle Styling */
+    .ampm-toggle-container {
+        background-color: #f1f3f5;
+        border-radius: 50px;
+        padding: 4px;
+        display: flex;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .ampm-pill {
+        border: none !important;
+        background: transparent !important;
+        color: #495057 !important;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 10px 0;
+        border-radius: 50px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    .ampm-pill.active {
+        background-color: #0d6efd !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25) !important;
+    }
+    
+    /* Slot Card Grid Styling */
+    .slot-card {
+        background-color: #ffffff;
+        border: 1.5px solid #dee2e6;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        user-select: none;
+        position: relative;
+    }
+    
+    .slot-card:hover {
+        border-color: #0d6efd;
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+    
+    .slot-card.selected {
+        background-color: #e7f1ff;
+        border-color: #0d6efd;
+        color: #0d6efd;
+        font-weight: 600;
+        box-shadow: 0 0 0 1px #0d6efd;
+    }
+    
+    .slot-card.disabled {
+        background-color: #f8f9fa;
+        border-color: #e9ecef;
+        color: #adb5bd !important;
+        pointer-events: none;
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+    
+    .slot-card.disabled .slot-time,
+    .slot-card.disabled .slot-duration {
+        color: #adb5bd !important;
+        text-decoration: line-through;
+    }
+    
+    .slot-card.disabled::after {
+        content: 'Passed';
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #dc3545;
+        margin-top: 2px;
+    }
+    
+    .slot-card.booked {
+        background-color: #fff5f5;
+        border-color: #fecaca;
+        color: #f87171 !important;
+        pointer-events: none;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .slot-card.booked::after {
+        content: 'Booked';
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #dc3545;
+        margin-top: 2px;
+    }
+    
+    .slot-card.booked .slot-time,
+    .slot-card.booked .slot-duration {
+        color: #f87171 !important;
+        text-decoration: line-through;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div style="padding-top:100px" class="container">
     <div class="row justify-content-center">
@@ -19,9 +125,96 @@
                         {{ form.booking_date }}
                         {% if form.booking_date.errors %}<small class="text-danger d-block mt-1">{{ form.booking_date.errors.0 }}</small>{% endif %}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary small">Select Time Slot</label>
-                        {{ form.time_slot }}
+                    <!-- Custom Time Slot Picker UI -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-secondary small d-block mb-3">Select Time Slot</label>
+                        
+                        <!-- AM/PM Toggle Header -->
+                        <div class="ampm-toggle-container mb-4 mx-auto" style="max-width: 360px;">
+                            <button type="button" id="toggle-am" class="btn ampm-pill active w-50">AM</button>
+                            <button type="button" id="toggle-pm" class="btn ampm-pill w-50">PM</button>
+                        </div>
+
+                        <!-- Slots Grid AM -->
+                        <div id="slots-grid-am" class="slots-grid row row-cols-3 g-3 mb-4">
+                            <!-- AM Slots (09:00 AM - 12:00 PM) -->
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="09_10">
+                                    <div class="slot-time fw-semibold">09:00 AM</div>
+                                    <div class="slot-duration small text-muted">10:00 AM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="10_11">
+                                    <div class="slot-time fw-semibold">10:00 AM</div>
+                                    <div class="slot-duration small text-muted">11:00 AM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="11_12">
+                                    <div class="slot-time fw-semibold">11:00 AM</div>
+                                    <div class="slot-duration small text-muted">12:00 PM</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Slots Grid PM -->
+                        <div id="slots-grid-pm" class="slots-grid row row-cols-3 g-3 mb-4" style="display: none;">
+                            <!-- PM Slots (12:00 PM - 07:00 PM) -->
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="12_13">
+                                    <div class="slot-time fw-semibold">12:00 PM</div>
+                                    <div class="slot-duration small text-muted">01:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="13_14">
+                                    <div class="slot-time fw-semibold">01:00 PM</div>
+                                    <div class="slot-duration small text-muted">02:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="14_15">
+                                    <div class="slot-time fw-semibold">02:00 PM</div>
+                                    <div class="slot-duration small text-muted">03:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="15_16">
+                                    <div class="slot-time fw-semibold">03:00 PM</div>
+                                    <div class="slot-duration small text-muted">04:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="16_17">
+                                    <div class="slot-time fw-semibold">04:00 PM</div>
+                                    <div class="slot-duration small text-muted">05:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="17_18">
+                                    <div class="slot-time fw-semibold">05:00 PM</div>
+                                    <div class="slot-duration small text-muted">06:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="18_19">
+                                    <div class="slot-time fw-semibold">06:00 PM</div>
+                                    <div class="slot-duration small text-muted">07:00 PM</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="slot-card text-center py-3" data-value="custom">
+                                    <div class="slot-time fw-semibold">Custom</div>
+                                    <div class="slot-duration small text-muted">Custom Slot</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Original Field hidden from view -->
+                        <div class="d-none">
+                            {{ form.time_slot }}
+                        </div>
                         {% if form.time_slot.errors %}<small class="text-danger d-block mt-1">{{ form.time_slot.errors.0 }}</small>{% endif %}
                     </div>
                     
@@ -56,7 +249,33 @@
     document.addEventListener("DOMContentLoaded", function() {
         const timeSlotSelect = document.getElementById("id_time_slot");
         const customTimeContainer = document.getElementById("custom-time-fields");
+        const amToggle = document.getElementById("toggle-am");
+        const pmToggle = document.getElementById("toggle-pm");
+        const amGrid = document.getElementById("slots-grid-am");
+        const pmGrid = document.getElementById("slots-grid-pm");
+        const slotCards = document.querySelectorAll(".slot-card");
+        const dateInput = document.querySelector('input[type="date"]');
+        const serviceId = "{{ service.id }}";
 
+        // 1. Toggle AM/PM Views
+        function showAM() {
+            amToggle.classList.add("active");
+            pmToggle.classList.remove("active");
+            amGrid.style.display = "flex";
+            pmGrid.style.display = "none";
+        }
+
+        function showPM() {
+            pmToggle.classList.add("active");
+            amToggle.classList.remove("active");
+            pmGrid.style.display = "flex";
+            amGrid.style.display = "none";
+        }
+
+        amToggle.addEventListener("click", showAM);
+        pmToggle.addEventListener("click", showPM);
+
+        // 2. Custom fields toggle
         function toggleCustomFields() {
             if (timeSlotSelect && timeSlotSelect.value === "custom") {
                 customTimeContainer.style.display = "flex";
@@ -65,14 +284,29 @@
             }
         }
 
+        // 3. Card click selection
+        slotCards.forEach(card => {
+            card.addEventListener("click", function() {
+                if (this.classList.contains("disabled") || this.classList.contains("booked")) {
+                    return; // Ignore passed or already booked slots
+                }
+                
+                slotCards.forEach(c => c.classList.remove("selected"));
+                this.classList.add("selected");
+                
+                if (timeSlotSelect) {
+                    timeSlotSelect.value = this.dataset.value;
+                    timeSlotSelect.dispatchEvent(new Event("change"));
+                }
+            });
+        });
+
         if (timeSlotSelect) {
             timeSlotSelect.addEventListener("change", toggleCustomFields);
-            toggleCustomFields(); // Run on initial load
+            toggleCustomFields(); // Initial run
         }
 
-        const dateInput = document.querySelector('input[type="date"]');
-        const serviceId = "{{ service.id }}";
-
+        // 4. API & Date Availability Checking
         function checkSlotAvailability() {
             if (!dateInput || !dateInput.value || !timeSlotSelect) return;
             
@@ -82,33 +316,88 @@
                 .then(data => {
                     const bookedSlots = data.booked_slots || [];
                     
-                    // Reset all options to visible and enabled first
+                    // Reset standard select element options
                     Array.from(timeSlotSelect.options).forEach(option => {
                         option.disabled = false;
                         option.style.display = 'block';
-                        // Remove any appended booked tags if present
-                        if (option.innerText.includes(' (Booked)')) {
-                            option.innerText = option.innerText.replace(' (Booked)', '');
-                        }
                     });
                     
-                    // Disable/Hide booked slots
+                    // Reset all custom slot cards
+                    slotCards.forEach(card => {
+                        card.classList.remove("disabled", "booked");
+                    });
+                    
+                    // A. Past hour checking for today's date in local timezone (Asia/Kolkata)
+                    const todayKolkataStr = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                    const isToday = selectedDate === todayKolkataStr;
+                    
+                    const nowKolkata = new Date();
+                    const kolkataHour = parseInt(nowKolkata.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: false, hour: '2-digit' }));
+                    
+                    const slotStartHours = {
+                        '09_10': 9,
+                        '10_11': 10,
+                        '11_12': 11,
+                        '12_13': 12,
+                        '13_14': 13,
+                        '14_15': 14,
+                        '15_16': 15,
+                        '16_17': 16,
+                        '17_18': 17,
+                        '18_19': 18
+                    };
+
+                    slotCards.forEach(card => {
+                        const val = card.dataset.value;
+                        if (val !== 'custom' && isToday && slotStartHours[val] !== undefined) {
+                            if (kolkataHour >= slotStartHours[val]) {
+                                card.classList.add("disabled");
+                                const option = Array.from(timeSlotSelect.options).find(opt => opt.value === val);
+                                if (option) option.disabled = true;
+                            }
+                        }
+                    });
+
+                    // B. Booked slot checking from API response
                     bookedSlots.forEach(slot => {
+                        // Original element
                         const option = Array.from(timeSlotSelect.options).find(opt => opt.value === slot);
                         if (option) {
                             option.disabled = true;
                             option.style.display = 'none';
-                            option.innerText += ' (Booked)';
+                        }
+                        // Custom UI cards
+                        const card = Array.from(slotCards).find(c => c.dataset.value === slot);
+                        if (card) {
+                            card.classList.add("booked");
                         }
                     });
                     
-                    // If the currently selected option is now disabled, switch to a valid one
-                    if (timeSlotSelect.selectedOptions[0] && timeSlotSelect.selectedOptions[0].disabled) {
-                        const firstAvailable = Array.from(timeSlotSelect.options).find(opt => !opt.disabled);
-                        if (firstAvailable) {
-                            timeSlotSelect.value = firstAvailable.value;
+                    // C. Highlight selected option card
+                    const currentVal = timeSlotSelect.value;
+                    const activeCard = Array.from(slotCards).find(c => c.dataset.value === currentVal);
+                    
+                    if (activeCard && !activeCard.classList.contains("disabled") && !activeCard.classList.contains("booked")) {
+                        slotCards.forEach(c => c.classList.remove("selected"));
+                        activeCard.classList.add("selected");
+                    } else {
+                        // Switch value if currently selected card is now disabled or booked
+                        const firstAvailableCard = Array.from(slotCards).find(c => !c.classList.contains("disabled") && !c.classList.contains("booked"));
+                        if (firstAvailableCard) {
+                            slotCards.forEach(c => c.classList.remove("selected"));
+                            firstAvailableCard.classList.add("selected");
+                            timeSlotSelect.value = firstAvailableCard.dataset.value;
                             toggleCustomFields();
                         }
+                    }
+
+                    // D. Ensure we display the correct AM/PM tab based on current selection
+                    const finalVal = timeSlotSelect.value;
+                    const isAM = ['09_10', '10_11', '11_12'].includes(finalVal);
+                    if (isAM) {
+                        showAM();
+                    } else {
+                        showPM();
                     }
                 })
                 .catch(err => console.error("Error checking slot availability:", err));
@@ -116,7 +405,7 @@
 
         if (dateInput) {
             dateInput.addEventListener("change", checkSlotAvailability);
-            // Run check on page load to account for any default date value
+            // Quick delay to ensure default dates are processed on render
             setTimeout(checkSlotAvailability, 200);
         }
     });

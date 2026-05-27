@@ -59,6 +59,7 @@
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_users' %}">Users</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_providers' %}">Providers</a></li>
                         <li class="nav-item"><a class="nav-link" href="{% url 'manage_bookings' %}">Bookings</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'reports_dashboard' %}">Reports</a></li>
                     {% endif %}
                     
                     <li class="nav-item d-none d-lg-block">
@@ -153,13 +154,42 @@
     // Auto-dismiss alerts after 5 seconds and shift page content up smoothly
     document.addEventListener("DOMContentLoaded", function() {
         // Tab-specific Session Logic
+        const urlParams = new URLSearchParams(window.location.search);
         let tabId = sessionStorage.getItem('django_tab_id');
-        if (!tabId) {
-            tabId = 'tab_' + Math.random().toString(36).substring(2, 8);
+
+        // 1. If tab is in URL, use it and save to sessionStorage
+        if (urlParams.get('tab')) {
+            tabId = urlParams.get('tab');
             sessionStorage.setItem('django_tab_id', tabId);
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
+        // 2. If tab not in URL, but we have it in sessionStorage, use it
+        // 3. Otherwise, check if we can inherit from referrer
+        if (!tabId) {
+            const referrer = document.referrer;
+            if (referrer && referrer.startsWith(window.location.origin)) {
+                try {
+                    const refUrl = new URL(referrer);
+                    const refTab = refUrl.searchParams.get('tab');
+                    if (refTab) {
+                        tabId = refTab;
+                        sessionStorage.setItem('django_tab_id', tabId);
+                    }
+                } catch (e) {
+                    console.error("Error parsing referrer URL:", e);
+                }
+            }
+        }
+
+        // 4. If still no tabId, or if explicitly requested to login/register to a new tab/account
+        const isNewTabRequest = urlParams.get('new_tab') === 'true';
+        if (!tabId || isNewTabRequest) {
+            tabId = 'tab_' + Math.random().toString(36).substring(2, 8);
+            sessionStorage.setItem('django_tab_id', tabId);
+            urlParams.delete('new_tab'); // Remove the new_tab flag
+        }
+
+        // Redirect if URL tab parameter is missing or mismatching the sessionStorage tabId
         if (urlParams.get('tab') !== tabId) {
             urlParams.set('tab', tabId);
             const newUrl = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
@@ -172,6 +202,10 @@
             if (link && link.href && link.href.startsWith(window.location.origin)) {
                 const href = link.getAttribute('href');
                 if (!href || href.startsWith('#') || href.startsWith('javascript:') || link.target === '_blank') {
+                    return;
+                }
+                // Avoid intercepting if user holds Cmd/Ctrl/Shift or middle-clicks (which triggers browser default open in new tab)
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) {
                     return;
                 }
                 e.preventDefault();

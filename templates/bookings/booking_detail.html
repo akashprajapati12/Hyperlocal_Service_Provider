@@ -42,20 +42,21 @@
                     </div>
                     <div class="col-md-6">
                         <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
-                            <small class="text-muted d-block">Date</small>
-                            <strong>{{ booking.booking_date }}</strong>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
-                            <small class="text-muted d-block">Time Slot</small>
+                            <small class="text-muted d-block">Date & Time Slot</small>
                             <strong>
+                                {{ booking.booking_date }} at 
                                 {% if booking.time_slot == 'custom' %}
                                     {{ booking.custom_start_time|time:"h:i A" }} - {{ booking.custom_end_time|time:"h:i A" }} (Custom)
                                 {% else %}
                                     {{ booking.get_time_slot_display }}
                                 {% endif %}
                             </strong>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
+                            <small class="text-muted d-block">Customer Address</small>
+                            <strong>{{ booking.user.address|default:"No address provided" }}</strong>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -85,28 +86,6 @@
                         <div class="p-3" style="background-color:var(--secondary-bg); border: 1px solid var(--border-color); border-radius:var(--radius)">
                             <small class="text-muted d-block">Additional Information</small>
                             <p class="mb-0 mt-1 small" style="white-space: pre-wrap; line-height: 1.5;">{{ booking.additional_info }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
-
-                    <!-- Detailed Overtime Invoice Breakdowns -->
-                    {% if booking.extra_hours > 0.00 %}
-                    <div class="col-12">
-                        <div class="p-3 border rounded-3 bg-white" style="border-radius: var(--radius) !important;">
-                            <h6 class="fw-bold mb-3 d-flex align-items-center"><i data-lucide="receipt" class="me-2 text-dark" style="width:16px;height:16px;"></i>Billing Invoice Breakdown</h6>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-secondary small">Base Service Charge</span>
-                                <span class="small fw-semibold">₹{{ booking.service.price }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-secondary small">Overtime Extensions ({% if booking.extra_hours_part > 0 %}{{ booking.extra_hours_part }}h {% endif %}{% if booking.extra_minutes_part > 0 %}{{ booking.extra_minutes_part }}m{% endif %})</span>
-                                <span class="small fw-semibold text-danger">+₹{{ booking.extra_charges }}</span>
-                            </div>
-                            <hr class="my-2" style="border-color: var(--border-color);">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold text-dark">Total Amount Due</span>
-                                <span class="fw-bold text-primary">₹{{ booking.total_price }}</span>
-                            </div>
                         </div>
                     </div>
                     {% endif %}
@@ -169,35 +148,7 @@
                     <a href="{% url 'booking_history' %}" class="btn btn-outline-primary">All Bookings</a>
                 </div>
 
-                <!-- Provider Overtime Entry Form -->
-                {% if request.user == booking.provider.user and booking.status != 'cancelled' %}
-                <div class="card p-3 mt-4 border bg-light" style="border-radius: var(--radius) !important;">
-                    <h6 class="fw-bold mb-2 d-flex align-items-center">
-                        <i data-lucide="clock" class="me-2 text-dark" style="width:18px;height:18px;"></i>Record Service Overtime
-                    </h6>
-                    <p class="text-muted small mb-3">If this service job has run past the booked slot, specify the overtime duration below. The system automatically computes extra charges based on your hourly service rate.</p>
-                    <form method="POST" action="{% url 'add_extra_time' booking.id %}">
-                        {% csrf_token %}
-                        <div class="row g-2 align-items-center">
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <input type="number" min="0" step="1" name="extra_hours" class="form-control" placeholder="Hours" value="{{ booking.extra_hours_part|default:'0' }}" required>
-                                    <span class="input-group-text">hrs</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="input-group">
-                                    <input type="number" min="0" max="59" step="1" name="extra_minutes" class="form-control" placeholder="Minutes" value="{{ booking.extra_minutes_part|default:'0' }}" required>
-                                    <span class="input-group-text">mins</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary w-100 py-2">Save & Calculate</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                {% endif %}
+
             </div>
         </div>
     </div>

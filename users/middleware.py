@@ -80,3 +80,22 @@ class TabSessionMiddleware(SessionMiddleware):
                 del response.cookies[settings.SESSION_COOKIE_NAME]
 
         return response
+
+
+class NoCacheMiddleware:
+    """
+    Middleware that adds headers to prevent the browser from caching dynamic HTML pages.
+    This prevents bfcache (back-forward cache) issues where logging out
+    and clicking back/forward displays stale authenticated content.
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if response.has_header('Content-Type') and 'text/html' in response['Content-Type']:
+            response['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            response['Pragma'] = 'no-cache'
+            response['Expires'] = '0'
+        return response
+

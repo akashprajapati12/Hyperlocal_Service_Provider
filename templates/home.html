@@ -206,7 +206,7 @@
         <p class="mb-4 text-muted mx-auto" style="max-width: 500px;">Sign up as a customer to book quality local services, or register as a provider to start offering your professional services.</p>
         <div class="d-flex justify-content-center gap-2">
             <a href="{% url 'register' %}" class="btn btn-primary btn-lg">Sign Up as Customer</a>
-            <a href="{% url 'provider_register' %}" class="btn btn-outline-primary btn-lg">Join as Provider</a>
+            <a href="{% url 'register' %}?role=provider" class="btn btn-outline-primary btn-lg">Join as Provider</a>
         </div>
     </div>
 </section>

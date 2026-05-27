@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load custom_filters %}
+{% block title %}{{ title }} — Admin Reports{% endblock %}
+
+{% block content %}
+<div style="padding-top:80px">
+<div class="container dashboard-content">
+    <!-- Header with Navigation -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="mb-1" style="font-family:'Poppins'">{{ title }}</h4>
+            <p class="text-muted mb-0">Period: <strong>{{ date_from|date:"d M Y" }} to {{ date_to|date:"d M Y" }}</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'reports_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                <i data-lucide="arrow-left" style="width: 16px; height: 16px;"></i> Back to Reports
+            </a>
+            <a href="{% url 'generate_customer_pdf_report' %}?period={{ time_period }}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="btn btn-sm btn-primary">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Period Selector -->
+    <div class="mb-4">
+        <div class="btn-group" role="group">
+            <a href="{% url 'customer_service_report' %}?period=daily" 
+               class="btn btn-sm {% if time_period == 'daily' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                <i data-lucide="calendar-today" style="width: 16px; height: 16px;"></i> Daily
+            </a>
+            <a href="{% url 'customer_service_report' %}?period=weekly" 
+               class="btn btn-sm {% if time_period == 'weekly' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                <i data-lucide="calendar-range" style="width: 16px; height: 16px;"></i> Weekly
+            </a>
+            <a href="{% url 'customer_service_report' %}?period=monthly" 
+               class="btn btn-sm {% if time_period == 'monthly' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                <i data-lucide="calendar" style="width: 16px; height: 16px;"></i> Monthly
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <form method="get" class="row row-cols-lg-auto g-2 align-items-center">
+            <input type="hidden" name="period" value="{{ time_period }}">
+            <div class="col">
+                <input type="search" name="q" value="{{ search_query }}" class="form-control form-control-sm" placeholder="Search customer name, email or phone">
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-sm btn-primary">Search</button>
+            </div>
+            {% if search_query %}
+            <div class="col">
+                <a href="{% url 'customer_service_report' %}?period={{ time_period }}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+            {% endif %}
+        </form>
+        {% if search_query %}
+        <p class="text-muted mt-2 mb-0">Showing results for "<strong>{{ search_query }}</strong>"</p>
+        {% endif %}
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-value">{{ total_bookings }}</div>
+                    <div class="stat-label">Total Bookings</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-value">₹{{ total_revenue|floatformat:0 }}</div>
+                    <div class="stat-label">Total Revenue</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-value">{{ customer_services|length }}</div>
+                    <div class="stat-label">Active Customers</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div>
+                    <div class="stat-value">₹{{ total_revenue|divide:total_bookings|floatformat:0 }}</div>
+                    <div class="stat-label">Avg Revenue/Booking</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Services -->
+    {% if top_services %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom p-3">
+                    <h6 class="mb-0" style="font-family:'Poppins'">
+                        <i data-lucide="trending-up" style="width: 18px; height: 18px; display: inline; margin-right: 8px;"></i>
+                        Top 5 Most Used Services
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="font-family:'Poppins'">Service Name</th>
+                                    <th style="font-family:'Poppins'" class="text-center">Usage Count</th>
+                                    <th style="font-family:'Poppins'" class="text-center">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service, count in top_services %}
+                                <tr>
+                                    <td>{{ service }}</td>
+                                    <td class="text-center"><span class="badge bg-primary">{{ count }}</span></td>
+                                    <td class="text-center">
+                                        {% if total_bookings > 0 %}
+                                            {{ count|multiply:100|divide:total_bookings|floatformat:1 }}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Customer Details Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom p-3">
+                    <h6 class="mb-0" style="font-family:'Poppins'">
+                        <i data-lucide="users" style="width: 18px; height: 18px; display: inline; margin-right: 8px;"></i>
+                        Customer Service Usage Details
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if customer_services %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="font-family:'Poppins'">Customer Name</th>
+                                    <th style="font-family:'Poppins'">Email</th>
+                                    <th style="font-family:'Poppins'" class="text-center">Phone</th>
+                                    <th style="font-family:'Poppins'" class="text-center">Total Services</th>
+                                    <th style="font-family:'Poppins'" class="text-center">Total Spent</th>
+                                    <th style="font-family:'Poppins'" class="text-center">Avg Per Service</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customer_services %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ customer.name }}</strong>
+                                    </td>
+                                    <td>{{ customer.email }}</td>
+                                    <td class="text-center">{{ customer.phone }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">{{ customer.total_services }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <strong>₹{{ customer.total_spent|floatformat:2 }}</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        ₹{{ customer.total_spent|divide:customer.total_services|floatformat:2 }}
+                                    </td>
+                                </tr>
+                                {% if customer.services_breakdown %}
+                                <tr class="table-light">
+                                    <td colspan="6" class="p-3">
+                                        <small style="font-family:'Poppins'"><strong>Services Breakdown:</strong></small>
+                                        <div class="mt-2">
+                                            {% for service, count in customer.services_breakdown.items %}
+                                            <span class="badge bg-light text-dark me-2 mb-1">{{ service }}: {{ count }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i data-lucide="inbox" style="width: 48px; height: 48px; opacity: 0.5;"></i>
+                        <p class="mt-2">No customer service data available for the selected period</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+<style>
+    .dashboard-content {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 30px;
+        min-height: calc(100vh - 200px);
+    }
+
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1e3a8a;
+        font-family: 'Poppins';
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: #6b7280;
+        font-family: 'Poppins';
+        margin-top: 4px;
+    }
+
+    .card {
+        border: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        border-top: none;
+        font-weight: 600;
+        font-size: 13px;
+        text-transform: uppercase;
+        color: #6b7280;
+        letter-spacing: 0.5px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .badge {
+        font-size: 12px;
+        padding: 6px 10px;
+        font-weight: 500;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        color: white;
+    }
+
+    .btn-group > .btn {
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #673a91 100%);
+    }
+</style>
+{% endblock %}
