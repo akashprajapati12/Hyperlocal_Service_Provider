@@ -7,14 +7,10 @@ from bookings.models import Booking
 
 
 def home_view(request):
-    """Landing page — providers/admins skip to dashboard."""
+    """Landing page."""
     context = {}
     if request.user.is_authenticated:
-        if request.user.role == 'provider':
-            return redirect('provider_dashboard')
-        elif request.user.role == 'admin':
-            return redirect('admin_dashboard')
-        else:
+        if request.user.role == 'customer':
             # Customer role
             from reviews.models import Review
             from django.db.models import Avg

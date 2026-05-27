@@ -100,7 +100,7 @@
     </div>
 </section>
 
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.role == 'customer' %}
 <!-- Customer Dashboard Section -->
 <section class="py-5" style="background-color: var(--secondary-bg); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
     <div class="container">
