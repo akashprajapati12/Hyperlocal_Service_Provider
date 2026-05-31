@@ -133,6 +133,9 @@
                         {% if user == booking.user %}
                         <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-outline-danger">Cancel Booking</a>
                         {% endif %}
+                        {% if user == booking.provider.user %}
+                        <a href="{% url 'reschedule_booking' booking.id %}" class="btn btn-outline-primary">Reschedule Booking</a>
+                        {% endif %}
                     {% endif %}
                     {% if can_dispute %}
                     <a href="{% url 'raise_dispute' booking.id %}" class="btn btn-danger">Raise Dispute</a>

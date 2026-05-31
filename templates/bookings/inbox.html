@@ -66,13 +66,13 @@
                         {% for item in inbox_items %}
                             <div class="p-3 border rounded d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between chat-inbox-row transition-all gap-3" 
                                  style="border-color: var(--border-color) !important; border-radius: var(--radius); background-color: var(--white);">
-                                <div class="d-flex align-items-center gap-3 flex-fill min-width-0 w-100">
+                                <div class="d-flex align-items-center gap-3 flex-fill" style="min-width: 0;">
                                     <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center text-primary fw-bold" 
                                          style="width: 48px; height: 48px; min-width: 48px; font-size: 1.1rem; border-color: var(--border-color) !important;">
                                         {{ item.avatar_text }}
                                     </div>
  
-                                    <div class="flex-grow-1 min-width-0">
+                                    <div class="flex-grow-1" style="min-width: 0;">
                                         <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                             <h6 class="mb-0 fw-bold text-dark text-truncate" style="font-size: 0.98rem;">
                                                 {{ item.title_display }}
@@ -103,7 +103,7 @@
                                                 <strong class="text-secondary">{{ item.booking.service.service_name }}:</strong> 
                                             {% endif %}
                                             {% if item.last_message %}
-                                                {{ item.last_message.message }}
+                                                {{ item.last_message.message|truncatechars:75 }}
                                             {% else %}
                                                 <em class="text-muted font-italic">No messages exchanged yet. Send a message to start!</em>
                                             {% endif %}

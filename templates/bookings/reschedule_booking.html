@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Book Service — HyperLocal{% endblock %}
+{% block title %}Reschedule Booking — HyperLocal{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -112,22 +112,22 @@
     <div class="row justify-content-center">
         <div class="col-lg-6">
             <div class="card p-4">
-                <h4 class="mb-4 d-flex align-items-center" style="font-family:'Poppins'"><i data-lucide="calendar" class="me-2" style="width:20px;height:20px;"></i>Book Service</h4>
+                <h4 class="mb-4 d-flex align-items-center" style="font-family:'Poppins'"><i data-lucide="calendar" class="me-2" style="width:20px;height:20px;"></i>Reschedule Booking #{{ booking.id }}</h4>
                 <div class="p-3 mb-4" style="background-color:var(--secondary-bg); border:1px solid var(--border-color); border-radius:var(--radius);">
                     <h5 class="mb-1" style="font-size:1.1rem;">{{ service.service_name }}</h5>
-                    <p class="text-muted mb-2 small">by {{ service.provider.user.get_full_name|default:service.provider.user.username }}</p>
+                    <p class="text-muted mb-2 small">Customer: <strong>{{ booking.user.get_full_name|default:booking.user.username }}</strong></p>
                     <span class="price-tag">₹{{ service.price }}</span>
                 </div>
                 <form method="POST">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-secondary small">Select Date</label>
+                        <label class="form-label fw-semibold text-secondary small">Select New Date</label>
                         {{ form.booking_date }}
                         {% if form.booking_date.errors %}<small class="text-danger d-block mt-1">{{ form.booking_date.errors.0 }}</small>{% endif %}
                     </div>
                     <!-- Custom Time Slot Picker UI -->
                     <div class="mb-4">
-                        <label class="form-label fw-bold text-secondary small d-block mb-3">Select Time Slot</label>
+                        <label class="form-label fw-bold text-secondary small d-block mb-3">Select New Time Slot</label>
                         
                         <!-- AM/PM Toggle Header -->
                         <div class="ampm-toggle-container mb-4 mx-auto" style="max-width: 360px;">
@@ -233,12 +233,12 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-semibold text-secondary small">Additional Information (Optional)</label>
+                        <label class="form-label fw-semibold text-secondary small">Reschedule Reason / Information</label>
                         {{ form.additional_info }}
                         {% if form.additional_info.errors %}<small class="text-danger d-block mt-1">{{ form.additional_info.errors.0 }}</small>{% endif %}
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 py-2">Proceed to Payment</button>
-                    <a href="{% url 'service_detail' service.id %}" class="btn btn-outline-primary w-100 mt-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Reschedule Booking</button>
+                    <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline-primary w-100 mt-2">Cancel</a>
                 </form>
             </div>
         </div>
@@ -359,7 +359,15 @@
                     });
 
                     // B. Booked slot checking from API response
+                    // Exclude the currently booked slot of *this* specific booking so it remains selectable for this reschedule
+                    const currentBookingSlot = "{{ booking.time_slot }}";
+                    const currentBookingDate = "{{ booking.booking_date|date:'Y-m-d' }}";
+                    
                     bookedSlots.forEach(slot => {
+                        if (slot === currentBookingSlot && selectedDate === currentBookingDate) {
+                            return; // Allow selecting the same slot on the same day
+                        }
+                        
                         // Original element
                         const option = Array.from(timeSlotSelect.options).find(opt => opt.value === slot);
                         if (option) {

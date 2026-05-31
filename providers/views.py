@@ -41,7 +41,7 @@ def provider_dashboard(request):
         provider = request.user.provider_profile
     except ServiceProvider.DoesNotExist:
         messages.error(request, 'Provider profile not found.')
-        return redirect('home')
+        return redirect('dashboard')
 
     bookings = Booking.objects.filter(provider=provider).select_related('user', 'service').exclude(additional_info__in=["Admin Direct Support Line", "Admin Customer Support Line"])
     total_earnings = Payment.objects.filter(
@@ -72,7 +72,7 @@ def add_service_view(request):
         provider = request.user.provider_profile
     except ServiceProvider.DoesNotExist:
         messages.error(request, 'Provider profile not found.')
-        return redirect('home')
+        return redirect('dashboard')
 
     if request.method == 'POST':
         form = ServiceForm(request.POST)
@@ -110,7 +110,7 @@ def manage_requests_view(request):
         provider = request.user.provider_profile
     except ServiceProvider.DoesNotExist:
         messages.error(request, 'Provider profile not found.')
-        return redirect('home')
+        return redirect('dashboard')
 
     if request.method == 'POST':
         booking_id = request.POST.get('booking_id')
@@ -185,7 +185,7 @@ def update_profile_view(request):
         provider = request.user.provider_profile
     except ServiceProvider.DoesNotExist:
         messages.error(request, 'Provider profile not found.')
-        return redirect('home')
+        return redirect('dashboard')
 
     if request.method == 'POST':
         user_form = UserProfileUpdateForm(request.POST, request.FILES, instance=request.user)
@@ -217,7 +217,7 @@ def my_services_view(request):
         provider = request.user.provider_profile
     except ServiceProvider.DoesNotExist:
         messages.error(request, 'Provider profile not found.')
-        return redirect('home')
+        return redirect('dashboard')
 
     services = Service.objects.filter(provider=provider)
     context = {

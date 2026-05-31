@@ -14,4 +14,5 @@ urlpatterns = [
     path('inbox/', views.chat_inbox_view, name='chat_inbox'),
     path('admin-start-chat/<int:user_id>/', views.admin_start_chat_view, name='admin_start_chat'),
     path('<int:booking_id>/raise-dispute/', views.raise_dispute_view, name='raise_dispute'),
+    path('<int:booking_id>/reschedule/', views.reschedule_booking_view, name='reschedule_booking'),
 ]

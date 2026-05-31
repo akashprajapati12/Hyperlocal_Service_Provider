@@ -580,3 +580,45 @@ def delete_chat_view(request, booking_id):
             'message': f'An error occurred: {str(e)}'
         }, status=500)
 
+
+@login_required
+def reschedule_booking_view(request, booking_id):
+    """Allow provider or admin to reschedule a booking."""
+    booking = get_object_or_404(Booking, id=booking_id)
+
+    # Ensure only the provider or an admin can reschedule
+    if request.user != booking.provider.user and request.user.role != 'admin':
+        messages.error(request, 'Access denied. Only the assigned provider can reschedule.')
+        return redirect('booking_detail', booking_id=booking.id)
+
+    # Ensure booking is in pending or confirmed state
+    if booking.status not in ('pending', 'confirmed'):
+        messages.error(request, 'This booking cannot be rescheduled.')
+        return redirect('booking_detail', booking_id=booking.id)
+
+    if request.method == 'POST':
+        form = BookingForm(request.POST, instance=booking, service=booking.service)
+        if form.is_valid():
+            form.save()
+            
+            # Send notification to customer
+            from users.models import Notification
+            Notification.objects.create(
+                user=booking.user,
+                booking=booking,
+                title="Booking Rescheduled",
+                message=f"Your booking #{booking.id} for {booking.service.service_name} has been rescheduled to {booking.booking_date} at {booking.get_time_slot_display() if booking.time_slot != 'custom' else 'Custom time slot'}."
+            )
+            
+            messages.success(request, 'Booking rescheduled successfully!')
+            return redirect('booking_detail', booking_id=booking.id)
+    else:
+        form = BookingForm(instance=booking, service=booking.service)
+
+    context = {
+        'form': form,
+        'booking': booking,
+        'service': booking.service,
+    }
+    return render(request, 'bookings/reschedule_booking.html', context)
+

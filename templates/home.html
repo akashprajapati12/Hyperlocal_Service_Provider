@@ -13,7 +13,7 @@
                     <span id="home-greeting-title" class="text-uppercase fw-bold text-dark" style="font-family:'Poppins'; font-size:1.15rem; letter-spacing:0.08em; color:#000000 !important;"></span>
                 </div>
                 <h1 class="mb-3">Your everyday services, <br><span class="accent-outline">simplified.</span></h1>
-                <p class="mb-4">Book vetted local professionals for repair, installation, cleaning, and tutoring. Straightforward hourly pricing, transparent reviews, and zero hassle.</p>
+                <p class="mb-4">Book vetted local professionals for repair, installation, cleaning, and tutoring. Straightforward flat rate pricing, transparent reviews, and zero hassle.</p>
                 
                 <!-- Unique Search Box -->
                 <form method="GET" action="{% url 'service_list' %}" class="d-flex gap-2 mb-4 p-1 bg-white border border-dark rounded-2" style="max-width:540px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
@@ -225,13 +225,7 @@
                 greeting = "Good Afternoon";
             }
             {% if user.is_authenticated %}
-                {% if user.role == 'customer' %}
-                    homeGreetingTitle.textContent = `${greeting}, Customer {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
-                {% elif user.role == 'provider' %}
-                    homeGreetingTitle.textContent = `${greeting}, Provider {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
-                {% elif user.role == 'admin' %}
-                    homeGreetingTitle.textContent = `${greeting}, Admin {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
-                {% endif %}
+                homeGreetingTitle.textContent = `${greeting}, {{ user.first_name|default:user.username }}! Welcome to HyperLocal.`;
             {% else %}
                 homeGreetingTitle.textContent = `${greeting}! Welcome to HyperLocal.`;
             {% endif %}

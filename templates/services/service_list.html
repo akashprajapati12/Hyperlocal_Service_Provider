@@ -12,13 +12,16 @@
     <div class="card p-3 mb-4">
         <form method="GET" class="d-flex flex-wrap gap-2 align-items-center">
             <input type="text" name="search" class="form-control" style="max-width:320px;" placeholder="Search services, providers..." value="{{ search_query }}">
+            {% if selected_category %}
+                <input type="hidden" name="category" value="{{ selected_category }}">
+            {% endif %}
             <button type="submit" class="btn btn-primary d-flex align-items-center"><i data-lucide="search" class="me-1" style="width:16px;height:16px;"></i>Search</button>
             {% if search_query or selected_category %}<a href="{% url 'service_list' %}" class="btn btn-outline-primary">Clear</a>{% endif %}
         </form>
         <div class="mt-3 d-flex flex-wrap gap-2">
-            <a href="{% url 'service_list' %}" class="filter-btn {% if not selected_category %}active{% endif %}">All</a>
+            <a href="{% url 'service_list' %}{% if search_query %}?search={{ search_query }}{% endif %}" class="filter-btn {% if not selected_category %}active{% endif %}">All</a>
             {% for val, label in categories %}
-            <a href="{% url 'service_list' %}?category={{ val }}" class="filter-btn {% if selected_category == val %}active{% endif %}">{{ label }}</a>
+            <a href="{% url 'service_list' %}?category={{ val }}{% if search_query %}&amp;search={{ search_query }}{% endif %}" class="filter-btn {% if selected_category == val %}active{% endif %}">{{ label }}</a>
             {% endfor %}
         </div>
     </div>

@@ -21,7 +21,8 @@ def service_list_view(request):
             Q(description__icontains=search) |
             Q(provider__user__first_name__icontains=search) |
             Q(provider__user__last_name__icontains=search) |
-            Q(provider__location__icontains=search)
+            Q(provider__location__icontains=search) |
+            Q(category__icontains=search)
         )
 
     # Add average rating to each service

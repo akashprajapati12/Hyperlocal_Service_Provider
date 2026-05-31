@@ -10,6 +10,8 @@ def home_view(request):
     """Landing page."""
     context = {}
     if request.user.is_authenticated:
+        if request.user.role in ['admin', 'provider']:
+            return redirect('dashboard')
         if request.user.role == 'customer':
             # Customer role
             from reviews.models import Review
@@ -80,6 +82,8 @@ def login_view(request):
                 else:
                     request.session.set_expiry(0)        # Browser close
                 messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+                if user.role in ['admin', 'provider']:
+                    return redirect('dashboard')
                 # Redirect to home page after login
                 return redirect('home')
             else:
