@@ -22,6 +22,9 @@ class ProviderRegistrationForm(UserCreationForm):
     document = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={
         'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'
     }), help_text='Upload ID proof or skill certificate (PDF, JPG, PNG)')
+    pincode = forms.CharField(max_length=20, required=True, widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'Pincode'
+    }))
 
     class Meta:
         model = UserProfile
@@ -45,6 +48,7 @@ class ProviderRegistrationForm(UserCreationForm):
                 user=user,
                 skill='',
                 location='',
+                pincode=self.cleaned_data.get('pincode', ''),
                 bio='',
                 document=self.files.get('document') if self.files.get('document') else None,
             )
@@ -56,10 +60,14 @@ class ProviderProfileForm(forms.ModelForm):
 
     class Meta:
         model = ServiceProvider
-        fields = ['skill', 'location', 'availability_status', 'bio']
+        fields = ['skill', 'location', 'city', 'pincode', 'latitude', 'longitude', 'availability_status', 'bio']
         widgets = {
             'skill': forms.TextInput(attrs={'class': 'form-control'}),
-            'location': forms.TextInput(attrs={'class': 'form-control'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Street Address / Area'}),
+            'city': forms.TextInput(attrs={'class': 'form-control', 'id': 'id_city', 'placeholder': 'City'}),
+            'pincode': forms.TextInput(attrs={'class': 'form-control', 'id': 'id_pincode', 'placeholder': 'Pincode'}),
+            'latitude': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_latitude', 'placeholder': 'Latitude', 'step': 'any'}),
+            'longitude': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_longitude', 'placeholder': 'Longitude', 'step': 'any'}),
             'availability_status': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }

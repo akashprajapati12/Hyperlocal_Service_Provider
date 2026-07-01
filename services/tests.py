@@ -65,6 +65,7 @@ class ServiceViewsTest(TestCase):
         )
         self.provider = ServiceProvider.objects.create(
             user=self.provider_user, skill='Electrical', location='Mumbai',
+            city='Mumbai', pincode='400001',
             availability_status=True, is_verified=True
         )
         self.service = Service.objects.create(
@@ -116,3 +117,15 @@ class ServiceViewsTest(TestCase):
         response = self.client.get(reverse('service_detail', args=[self.service.id]))
         self.assertIn('avg_rating', response.context)
         self.assertEqual(response.context['avg_rating'], 0)
+
+    def test_service_list_location_city_and_pincode(self):
+        # Searching Mumbai 400001 should extract the pincode and find the service
+        response = self.client.get(reverse('service_list'), {'q_loc': 'Mumbai 400001'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'AC Repair')
+
+    def test_service_list_location_city_and_wrong_pincode(self):
+        # Searching Mumbai 999999 (wrong pincode) should search only by pincode and return no results
+        response = self.client.get(reverse('service_list'), {'q_loc': 'Mumbai 999999'})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'AC Repair')

@@ -30,6 +30,11 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Phone</label>{{ form.phone }}
+                    {% if form.phone.errors %}<small class="text-danger d-block mt-1">{{ form.phone.errors.0 }}</small>{% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Pincode</label>{{ form.pincode }}
+                    {% if form.pincode.errors %}<small class="text-danger d-block mt-1">{{ form.pincode.errors.0 }}</small>{% endif %}
                 </div>
                 <div class="col-12">
                     <label class="form-label">Verification Document</label>{{ form.document }}

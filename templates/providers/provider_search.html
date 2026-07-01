@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% block title %}Find Nearby Service Providers — HyperLocal{% endblock %}
+
+{% block content %}
+<div style="padding-top:100px; padding-bottom:80px;" class="container">
+    <div class="text-center mb-5">
+        <h2 style="font-family:'Poppins'; font-weight: 600;">Find Service Providers Near You</h2>
+        <p class="text-muted">Search by city, pincode, or use browser geolocation to find the nearest local experts.</p>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alert-container" class="mb-4"></div>
+
+    <!-- Search Form -->
+    <div class="card p-4 shadow-sm border border-light mb-5 bg-white" style="border-radius:12px;">
+        <form id="search-form" method="GET" class="row g-3 align-items-center">
+            <div class="col-md-7 col-lg-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i data-lucide="map-pin" style="width:20px; height:20px;"></i>
+                    </span>
+                    <input type="text" id="search-input" name="q" class="form-control border-start-0 py-3 shadow-none" placeholder="Enter City Name or Pincode (e.g. Ranchi, 834001)" value="{{ q_query }}">
+                </div>
+            </div>
+            
+            <input type="hidden" id="lat-input" name="lat" value="{{ user_lat|default:'' }}">
+            <input type="hidden" id="lon-input" name="lon" value="{{ user_lon|default:'' }}">
+
+            <div class="col-md-5 col-lg-4 d-flex gap-2">
+                <button type="button" id="use-location-btn" class="btn btn-outline-primary py-3 px-3 d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="font-weight: 500;">
+                    <i data-lucide="navigation" style="width:16px; height:16px;"></i> Use My Location
+                </button>
+                <button type="submit" class="btn btn-primary py-3 px-4 d-flex align-items-center justify-content-center gap-2 flex-grow-1" style="font-weight: 500;">
+                    <i data-lucide="search" style="width:16px; height:16px;"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading-indicator" class="justify-content-center align-items-center py-5 my-4" style="display:none; flex-direction:column; gap:12px;">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="text-muted fw-medium" style="font-size:0.95rem;">Finding nearby service providers...</span>
+    </div>
+
+    <!-- Status Messages for Initial State -->
+    <div id="status-message" class="text-center py-5 text-muted">
+        <i data-lucide="map" class="mx-auto d-block mb-3" style="width:48px; height:48px; stroke-width:1.2;"></i>
+        <h5>Search is ready</h5>
+        <p class="small">Share your location or type a search query to view available providers.</p>
+    </div>
+
+    <!-- Provider Listing Grid -->
+    <div class="row g-4" id="providers-row">
+        <!-- Render initially if Django context has providers -->
+        {% include 'providers/provider_list_cards.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchForm = document.getElementById("search-form");
+    const useLocationBtn = document.getElementById("use-location-btn");
+    const searchInput = document.getElementById("search-input");
+    const latInput = document.getElementById("lat-input");
+    const lonInput = document.getElementById("lon-input");
+    const statusMessage = document.getElementById("status-message");
+
+    // Hide placeholder status message if there are already cards rendered
+    if (document.querySelectorAll("#providers-row .col-md-6").length > 0) {
+        statusMessage.style.display = "none";
+    }
+
+    // Geolocation action when user clicks "Use My Location"
+    if (useLocationBtn) {
+        useLocationBtn.addEventListener("click", function() {
+            requestGeolocation(false);
+        });
+    }
+
+    // Intercept search form submission to run AJAX
+    if (searchForm) {
+        searchForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const query = searchInput.value.trim();
+            // Clear lat/lon when manually typing so we do not sort by old coordinates
+            latInput.value = "";
+            lonInput.value = "";
+            
+            if (statusMessage) statusMessage.style.display = "none";
+            performSearch(query, null, null);
+        });
+    }
+
+    // Automatically request location permission on page load
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('q') && !urlParams.has('lat')) {
+        requestGeolocation(true);
+    }
+
+    function requestGeolocation(isAuto) {
+        const loadingIndicator = document.getElementById("loading-indicator");
+        
+        if (!navigator.geolocation) {
+            if (!isAuto) {
+                showAlert("Geolocation is not supported by your browser.", "danger");
+            }
+            return;
+        }
+
+        if (statusMessage) statusMessage.style.display = "none";
+        loadingIndicator.style.display = "flex";
+
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                latInput.value = lat;
+                lonInput.value = lon;
+
+                // Call reverse geocoding via OpenStreetMap Nominatim
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        loadingIndicator.style.display = "none";
+                        let city = "";
+                        let pincode = "";
+
+                        if (data && data.address) {
+                            city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.city_district || "";
+                            pincode = data.address.postcode || "";
+                        }
+
+                        let displayVal = "";
+                        if (city && pincode) {
+                            displayVal = `${city}, ${pincode}`;
+                        } else if (city) {
+                            displayVal = city;
+                        } else if (pincode) {
+                            displayVal = pincode;
+                        }
+
+                        if (displayVal) {
+                            searchInput.value = displayVal;
+                        }
+
+                        showAlert(`Location detected successfully: ${displayVal || "Coordinates resolved"}`, "success");
+                        performSearch(city || pincode || "", lat, lon);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        loadingIndicator.style.display = "none";
+                        showAlert("Coordinates detected, but failed to geocode city name.", "warning");
+                        performSearch("", lat, lon);
+                    });
+            },
+            function(error) {
+                loadingIndicator.style.display = "none";
+                console.error("Geolocation error:", error);
+                
+                // Show status message again if no results are showing
+                if (document.querySelectorAll("#providers-row .col-md-6").length === 0) {
+                    if (statusMessage) statusMessage.style.display = "block";
+                }
+
+                if (error.code === error.PERMISSION_DENIED) {
+                    showAlert("Location access denied. Please enter location manually.", "danger");
+                } else {
+                    if (!isAuto) {
+                        showAlert("Unable to retrieve location coordinates.", "danger");
+                    }
+                }
+            },
+            { timeout: 8000 }
+        );
+    }
+
+    function performSearch(query, lat, lon) {
+        const resultsContainer = document.getElementById("providers-row");
+        const loadingIndicator = document.getElementById("loading-indicator");
+        
+        loadingIndicator.style.display = "flex";
+        
+        let url = new URL(window.location.origin + window.location.pathname);
+        url.searchParams.set("ajax", "1");
+        if (query) {
+            url.searchParams.set("q", query);
+        }
+        if (lat && lon) {
+            url.searchParams.set("lat", lat);
+            url.searchParams.set("lon", lon);
+        }
+        
+        // Retain active Django tab if applicable
+        const currentTab = new URLSearchParams(window.location.search).get('tab');
+        if (currentTab) {
+            url.searchParams.set('tab', currentTab);
+        }
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.text())
+            .then(html => {
+                loadingIndicator.style.display = "none";
+                resultsContainer.innerHTML = html;
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                loadingIndicator.style.display = "none";
+                resultsContainer.innerHTML = '<div class="col-12 text-center py-5 text-danger"><h5>An error occurred</h5><p class="small text-muted">Please refresh the page and try again.</p></div>';
+            });
+    }
+
+    function showAlert(msg, type) {
+        const container = document.getElementById("alert-container");
+        container.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert" style="border-radius:8px;">
+                <div class="d-flex align-items-center gap-2">
+                    <i data-lucide="${type === 'success' ? 'check-circle' : (type === 'danger' ? 'alert-octagon' : 'alert-circle')}" style="width:18px; height:18px;"></i>
+                    <span>${msg}</span>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+        setTimeout(() => {
+            const alertEl = container.querySelector('.alert');
+            if (alertEl) {
+                const bsAlert = bootstrap.Alert.getOrCreateInstance(alertEl);
+                if (bsAlert) {
+                    bsAlert.close();
+                }
+            }
+        }, 5000);
+    }
+});
+</script>
+{% endblock %}

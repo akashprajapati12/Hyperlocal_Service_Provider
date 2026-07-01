@@ -20,7 +20,17 @@
             <h6 class="mb-3 text-muted text-uppercase" style="letter-spacing:1px;font-size:.75rem;font-weight:600;">Provider Info</h6>
             <div class="row g-3 mb-4">
                 <div class="col-md-6"><label class="form-label">Skill</label>{{ provider_form.skill }}</div>
-                <div class="col-md-6"><label class="form-label">Location</label>{{ provider_form.location }}</div>
+                <div class="col-md-6"><label class="form-label">Location / Area</label>{{ provider_form.location }}</div>
+                <div class="col-md-6"><label class="form-label">City</label>{{ provider_form.city }}</div>
+                <div class="col-md-6"><label class="form-label">Pincode</label>{{ provider_form.pincode }}</div>
+                <div class="col-md-6"><label class="form-label">Latitude</label>{{ provider_form.latitude }}</div>
+                <div class="col-md-6"><label class="form-label">Longitude</label>{{ provider_form.longitude }}</div>
+                <div class="col-12">
+                    <button type="button" id="detect-location-btn" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
+                        <i data-lucide="map-pin" class="me-1" style="width:14px;height:14px;"></i> Detect My Location
+                    </button>
+                    <span id="location-detect-status" class="small ms-2 text-muted"></span>
+                </div>
                 <div class="col-12"><label class="form-label">Bio</label>{{ provider_form.bio }}</div>
                 <div class="col-12"><div class="form-check">{{ provider_form.availability_status }}<label class="form-check-label ms-2 fw-semibold" style="font-size:.825rem;">Available for bookings</label></div></div>
             </div>
@@ -30,4 +40,74 @@
     </div>
 </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const detectBtn = document.getElementById("detect-location-btn");
+    const statusText = document.getElementById("location-detect-status");
+
+    if (detectBtn) {
+        detectBtn.addEventListener("click", function() {
+            if (!navigator.geolocation) {
+                statusText.textContent = "Geolocation is not supported by your browser.";
+                statusText.className = "small ms-2 text-danger";
+                return;
+            }
+
+            statusText.textContent = "Accessing location...";
+            statusText.className = "small ms-2 text-primary";
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    document.getElementById("id_latitude").value = lat.toFixed(6);
+                    document.getElementById("id_longitude").value = lon.toFixed(6);
+
+                    statusText.textContent = "Location detected. Finding city & pincode...";
+                    statusText.className = "small ms-2 text-primary";
+
+                    // Reverse geocode via Nominatim API
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data && data.address) {
+                                const city = data.address.city || data.address.town || data.address.village || data.address.suburb || data.address.city_district || "";
+                                const pincode = data.address.postcode || "";
+                                
+                                if (city) {
+                                    document.getElementById("id_city").value = city;
+                                }
+                                if (pincode) {
+                                    document.getElementById("id_pincode").value = pincode;
+                                }
+                                statusText.textContent = "Location detected successfully!";
+                                statusText.className = "small ms-2 text-success";
+                            } else {
+                                statusText.textContent = "Coordinates detected, but could not resolve address.";
+                                statusText.className = "small ms-2 text-warning";
+                            }
+                            if (window.lucide) {
+                                lucide.createIcons();
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            statusText.textContent = "Coordinates detected. Geocoding service error.";
+                            statusText.className = "small ms-2 text-warning";
+                        });
+                },
+                function(error) {
+                    console.error(error);
+                    statusText.textContent = "Location permission denied or retrieval failed.";
+                    statusText.className = "small ms-2 text-danger";
+                }
+            );
+        });
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}

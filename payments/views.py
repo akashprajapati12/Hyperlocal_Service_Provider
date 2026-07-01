@@ -1,4 +1,4 @@
-﻿from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
@@ -112,7 +112,7 @@ def upi_payment_view(request, booking_id):
     if session_key not in request.session:
         request.session[session_key] = timezone.now().isoformat()
 
-    upi_id = request.GET.get('upi_id', request.POST.get('upi_id', 'akashairmen-1@okicici')).strip()
+    upi_id = request.GET.get('upi_id', request.POST.get('upi_id', 'akashairmen-8@okicici')).strip()
     amount_str = request.GET.get('amount', request.POST.get('amount', str(booking.total_price))).strip()
 
     try:
@@ -175,7 +175,7 @@ def upi_payment_view(request, booking_id):
                     user=booking.provider.user,
                     booking=booking,
                     title='Booking Paid Online',
-                    message=f'Customer has completed online payment of ₹{amount_val:.2f} for Booking #{booking.id}.'
+                    message=f'Customer has completed online payment of ₹{amount_val:.2f} for Booking #{booking.formatted_id}.'
                 )
             except Exception:
                 pass
@@ -200,7 +200,7 @@ def upi_payment_view(request, booking_id):
                     user=booking.provider.user,
                     booking=booking,
                     title='Booking Paid Online',
-                    message=f'Customer has completed online payment of ₹{amount_val:.2f} for Booking #{booking.id}.'
+                    message=f'Customer has completed online payment of ₹{amount_val:.2f} for Booking #{booking.formatted_id}.'
                 )
             except Exception:
                 pass

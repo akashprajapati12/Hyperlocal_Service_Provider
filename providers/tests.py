@@ -56,6 +56,7 @@ class ProviderViewsTest(TestCase):
         )
         self.provider = ServiceProvider.objects.create(
             user=self.provider_user, skill='Cleaning', location='Patna',
+            city='Patna', pincode='800001',
             availability_status=True, is_verified=True
         )
         self.customer = UserProfile.objects.create_user(
@@ -141,3 +142,31 @@ class ProviderViewsTest(TestCase):
         response = self.client.post(reverse('delete_service', args=[self.service.id]))
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Service.objects.filter(id=self.service.id).exists())
+
+    def test_provider_search_city_and_pincode(self):
+        response = self.client.get(reverse('provider_search'), {'q': 'Patna 800001'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Cleaning')
+
+    def test_provider_search_city_and_wrong_pincode(self):
+        response = self.client.get(reverse('provider_search'), {'q': 'Patna 999999'})
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'Cleaning')
+
+    def test_provider_registration_saves_pincode(self):
+        post_data = {
+            'username': 'new_prov_pincode',
+            'first_name': 'Test',
+            'last_name': 'Provider',
+            'email': 'new_prov@example.com',
+            'phone': '9876543210',
+            'pincode': '826001',
+            'password1': 'pass12345',
+            'password2': 'pass12345',
+        }
+        response = self.client.post(reverse('provider_register'), post_data)
+        self.assertEqual(response.status_code, 302)
+        
+        user = UserProfile.objects.get(username='new_prov_pincode')
+        self.assertEqual(user.role, 'provider')
+        self.assertEqual(user.provider_profile.pincode, '826001')

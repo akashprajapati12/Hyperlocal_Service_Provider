@@ -9,4 +9,6 @@ urlpatterns = [
     path('update-profile/', views.update_profile_view, name='provider_update_profile'),
     path('my-services/', views.my_services_view, name='my_services'),
     path('delete-service/<int:service_id>/', views.delete_service_view, name='delete_service'),
+    path('search/', views.provider_search_view, name='provider_search'),
+    path('<int:provider_id>/profile/', views.provider_public_profile_view, name='provider_public_profile'),
 ]

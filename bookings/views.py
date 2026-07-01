@@ -29,7 +29,7 @@ def create_booking_view(request, service_id):
                 user=booking.provider.user,
                 booking=booking,
                 title="New Booking Request",
-                message=f"A new service is on the way, accept it (Booking #{booking.id})"
+                message=f"A new service is on the way, accept it (Booking #{booking.formatted_id})"
             )
             messages.success(request, 'Booking created! Proceed to payment.')
             return redirect('checkout', booking_id=booking.id)
@@ -116,7 +116,7 @@ def raise_dispute_view(request, booking_id):
                 user=admin,
                 booking=booking,
                 title="Dispute Raised",
-                message=f"Dispute raised for Booking #{booking.id}. Please join the chat."
+                message=f"Dispute raised for Booking #{booking.formatted_id}. Please join the chat."
             )
             
         # Notify provider
@@ -124,7 +124,7 @@ def raise_dispute_view(request, booking_id):
             user=booking.provider.user,
             booking=booking,
             title="Dispute Raised",
-            message=f"A dispute was raised for Booking #{booking.id}. Check the chat."
+            message=f"A dispute was raised for Booking #{booking.formatted_id}. Check the chat."
         )
 
         messages.success(request, 'Dispute has been raised. You have been redirected to the dispute chat.')
@@ -607,7 +607,7 @@ def reschedule_booking_view(request, booking_id):
                 user=booking.user,
                 booking=booking,
                 title="Booking Rescheduled",
-                message=f"Your booking #{booking.id} for {booking.service.service_name} has been rescheduled to {booking.booking_date} at {booking.get_time_slot_display() if booking.time_slot != 'custom' else 'Custom time slot'}."
+                message=f"Your booking #{booking.formatted_id} for {booking.service.service_name} has been rescheduled to {booking.booking_date} at {booking.get_time_slot_display() if booking.time_slot != 'custom' else 'Custom time slot'}."
             )
             
             messages.success(request, 'Booking rescheduled successfully!')

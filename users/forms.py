@@ -34,6 +34,9 @@ class UnifiedRegistrationForm(UserCreationForm):
     document = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={
         'class': 'form-control', 'accept': '.pdf,.jpg,.jpeg,.png'
     }), help_text='Upload ID proof or skill certificate (PDF, JPG, PNG)')
+    pincode = forms.CharField(max_length=20, required=False, widget=forms.TextInput(attrs={
+        'class': 'form-control', 'placeholder': 'Pincode'
+    }))
 
     class Meta:
         model = UserProfile
@@ -47,6 +50,15 @@ class UnifiedRegistrationForm(UserCreationForm):
         self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirm Password'})
 
+    def clean(self):
+        cleaned_data = super().clean()
+        role = cleaned_data.get('role')
+        if role == 'provider':
+            pincode = cleaned_data.get('pincode')
+            if not pincode:
+                self.add_error('pincode', 'Pincode is required for providers.')
+        return cleaned_data
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = self.cleaned_data['role']
@@ -59,6 +71,7 @@ class UnifiedRegistrationForm(UserCreationForm):
                     user=user,
                     skill='',
                     location='',
+                    pincode=self.cleaned_data.get('pincode', ''),
                     bio='',
                     document=self.files.get('document') if self.files.get('document') else None,
                 )

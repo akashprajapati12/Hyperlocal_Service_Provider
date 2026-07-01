@@ -125,9 +125,9 @@ def manage_requests_view(request):
                 user=booking.user,
                 booking=booking,
                 title="Booking Accepted",
-                message=f"Your service has been accepted (Booking #{booking.id})"
+                message=f"Your service has been accepted (Booking #{booking.formatted_id})"
             )
-            messages.success(request, f'Booking #{booking.id} confirmed!')
+            messages.success(request, f'Booking #{booking.formatted_id} confirmed!')
         elif action == 'reject':
             booking.status = 'cancelled'
             booking.save()
@@ -140,15 +140,15 @@ def manage_requests_view(request):
                 user=booking.user,
                 booking=booking,
                 title="Booking Request Declined",
-                message=f"Your booking #{booking.id} request has been declined by the provider."
+                message=f"Your booking #{booking.formatted_id} request has been declined by the provider."
             )
-            messages.info(request, f'Booking #{booking.id} cancelled.')
+            messages.info(request, f'Booking #{booking.formatted_id} cancelled.')
         elif action == 'complete':
             booking.status = 'completed'
             from django.utils import timezone
             booking.completed_at = timezone.now()
             booking.save()
-            messages.success(request, f'Booking #{booking.id} marked as completed!')
+            messages.success(request, f'Booking #{booking.formatted_id} marked as completed!')
         elif action == 'approve_payment':
             if hasattr(booking, 'payment'):
                 payment = booking.payment
@@ -160,9 +160,9 @@ def manage_requests_view(request):
                     user=booking.user,
                     booking=booking,
                     title="Payment Confirmed",
-                    message=f"The provider has approved and confirmed receipt of your payment for Booking #{booking.id}."
+                    message=f"The provider has approved and confirmed receipt of your payment for Booking #{booking.formatted_id}."
                 )
-                messages.success(request, f'Payment for Booking #{booking.id} approved successfully!')
+                messages.success(request, f'Payment for Booking #{booking.formatted_id} approved successfully!')
             else:
                 messages.error(request, 'No payment record found for this booking.')
 
@@ -238,3 +238,101 @@ def delete_service_view(request, service_id):
         service.delete()
         messages.success(request, 'Service deleted successfully!')
     return redirect('my_services')
+
+
+from math import radians, cos, sin, asin, sqrt
+from django.db.models import Q
+
+def get_distance(lat1, lon1, lat2, lon2):
+    if lat1 is None or lon1 is None or lat2 is None or lon2 is None:
+        return None
+    lon1, lat1, lon2, lat2 = map(radians, [lon1, lat1, lon2, lat2])
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    r = 6371 # Radius of Earth in km
+    return round(c * r, 2)
+
+
+def provider_search_view(request):
+    """Search providers by city/pincode and sort by distance if location coordinates are available."""
+    providers = ServiceProvider.objects.select_related('user').all()
+
+    # Filter to show available providers
+    providers = providers.filter(availability_status=True)
+
+    q = request.GET.get('q', '').strip()
+    if q:
+        import re
+        has_letters = bool(re.search(r'[a-zA-Z]', q))
+        has_digits = bool(re.search(r'\d', q))
+        if has_letters and has_digits:
+            pincode_match = re.search(r'\d+', q)
+            if pincode_match:
+                pincode = pincode_match.group(0)
+                providers = providers.filter(pincode__icontains=pincode)
+            else:
+                providers = providers.filter(
+                    Q(city__icontains=q) |
+                    Q(pincode__icontains=q) |
+                    Q(location__icontains=q)
+                )
+        else:
+            providers = providers.filter(
+                Q(city__icontains=q) |
+                Q(pincode__icontains=q) |
+                Q(location__icontains=q)
+            )
+
+    try:
+        user_lat = float(request.GET.get('lat'))
+        user_lon = float(request.GET.get('lon'))
+    except (ValueError, TypeError, KeyError):
+        user_lat, user_lon = None, None
+
+    providers_list = []
+    for p in providers:
+        if p.latitude is not None and p.longitude is not None and user_lat is not None and user_lon is not None:
+            p.distance = get_distance(user_lat, user_lon, p.latitude, p.longitude)
+        else:
+            p.distance = None
+        providers_list.append(p)
+
+    # Sort providers by distance (nearest first). Providers without distance go to the end.
+    providers_list.sort(key=lambda x: (x.distance is None, x.distance or 0))
+
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.GET.get('ajax') == '1'
+    if is_ajax:
+        return render(request, 'providers/provider_list_cards.html', {
+            'providers': providers_list,
+            'user_lat': user_lat,
+            'user_lon': user_lon,
+        })
+
+    context = {
+        'providers': providers_list,
+        'q_query': q,
+        'user_lat': user_lat,
+        'user_lon': user_lon,
+    }
+    return render(request, 'providers/provider_search.html', context)
+
+
+def provider_public_profile_view(request, provider_id):
+    """View provider profile with list of services, prices, and reviews."""
+    provider = get_object_or_404(ServiceProvider.objects.select_related('user'), id=provider_id)
+    services = provider.services.all()
+
+    from reviews.models import Review
+    reviews = Review.objects.filter(service__provider=provider).select_related('user', 'service').order_by('-review_date')
+
+    context = {
+        'provider': provider,
+        'services': services,
+        'reviews': reviews,
+        'avg_rating': provider.average_rating,
+        'review_count': provider.review_count,
+        'rating_range': range(1, 6),
+    }
+    return render(request, 'providers/provider_public_profile.html', context)

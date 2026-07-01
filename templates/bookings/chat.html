@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}Support Chat{% else %}Chat for Booking #{{ booking.id }}{% endif %} — HyperLocal{% endblock %}
+{% block title %}{% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}Support Chat{% else %}Chat for Booking #{{ booking.formatted_id }}{% endif %} — HyperLocal{% endblock %}
 
 {% block content %}
 <div style="padding-top:100px; min-height: 85vh; margin-bottom:80px;" class="container">
@@ -65,7 +65,7 @@
                                 {% if booking.additional_info == "Admin Direct Support Line" or booking.additional_info == "Admin Customer Support Line" %}
                                     <span class="text-primary fw-semibold"><i data-lucide="shield" class="me-1 d-inline-block" style="width:12px;height:12px;vertical-align:-1px;"></i>Official Support Channel</span>
                                 {% else %}
-                                    Booking #{{ booking.id }} — {{ booking.service.service_name }}
+                                    Booking #{{ booking.formatted_id }} — {{ booking.service.service_name }}
                                 {% endif %}
                             </small>
                         </div>

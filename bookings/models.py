@@ -62,8 +62,13 @@ class Booking(models.Model):
         """Total price including extra charges added by the provider."""
         return self.service.price + self.extra_charges
 
+    @property
+    def formatted_id(self):
+        """Returns the formatted booking serial string like HLSP0000001"""
+        return f"HLSP{self.id:07d}" if self.id else ""
+
     def __str__(self):
-        return f"Booking #{self.pk} — {self.service.service_name} ({self.status})"
+        return f"Booking #{self.formatted_id or self.pk} — {self.service.service_name} ({self.status})"
 
     class Meta:
         ordering = ['-created_at']

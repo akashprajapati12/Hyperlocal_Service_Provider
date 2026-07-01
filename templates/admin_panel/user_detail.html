@@ -181,7 +181,7 @@
                                 <tbody>
                                     {% for b in bookings %}
                                         <tr>
-                                            <td><strong>#{{ b.id }}</strong></td>
+                                            <td><strong>#{{ b.formatted_id }}</strong></td>
                                             <td>
                                                 <div class="fw-semibold text-dark">{{ b.service.service_name }}</div>
                                                 <small class="text-muted">{{ b.service.category|title }}</small>

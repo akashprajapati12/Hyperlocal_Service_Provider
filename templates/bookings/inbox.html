@@ -83,7 +83,7 @@
                                                 </span>
                                             {% else %}
                                                 <span class="badge rounded-pill bg-light text-secondary border small py-0.5 px-2">
-                                                    Booking #{{ item.booking.id }}
+                                                    Booking #{{ item.booking.formatted_id }}
                                                 </span>
                                             {% endif %}
                                             {% if item.booking.status == 'completed' %}

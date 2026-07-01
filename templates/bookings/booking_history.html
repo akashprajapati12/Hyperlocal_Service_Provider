@@ -17,7 +17,7 @@
             <table class="table table-modern mb-0">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>Booking Number</th>
                         <th>Service</th>
                         <th>Provider</th>
                         <th>Date</th>
@@ -29,7 +29,7 @@
                 <tbody>
                     {% for b in bookings %}
                     <tr>
-                        <td>{{ b.id }}</td>
+                        <td>#{{ b.formatted_id }}</td>
                         <td>{{ b.service.service_name }}</td>
                         <td>{{ b.provider.user.get_full_name|default:b.provider.user.username }}</td>
                         <td>{{ b.booking_date }}</td>
